@@ -61,7 +61,7 @@ public:
 	int32 EnemyMaxHP = 100.0f;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
-	int32 EnemyCurrentHP = 0;
+	int32 EnemyCurrentHP = EnemyMaxHP;
 
 	void OnDamaged(int32 dmg);
 
@@ -76,6 +76,7 @@ public:
 	void Idle();
 	void MoveTotaget();
 	void Attack();
+	void Die();
 
 	bool bAttack = false;
 private:

@@ -12,6 +12,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Animation/AnimInstance.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h>
+#include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 
 
 // Sets default values
@@ -75,7 +76,7 @@ void AEnemy::Tick(float DeltaTime)
 		
 		break;
 	case EEnemyState::DIE:
-		//Die();
+		Die();
 		break;
 	default:
 		break;
@@ -126,12 +127,24 @@ void AEnemy::Attack()
 	
 }
 
-
+void AEnemy::Die()
+{
+	//Destroy();
+}
 
 
 void AEnemy::OnDamaged(int32 dmg)
 {
-	
+	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP -dmg, 0,100);
+	if (EnemyCurrentHP <= 0)
+	{
+		enemyState = EEnemyState::DIE;
+	}
+	else
+	{
+		enemyState = EEnemyState::DAMAGED;
+	}
+
 }
 
 void AEnemy::SearchPlayer()
