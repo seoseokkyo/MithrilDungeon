@@ -12,14 +12,19 @@ ADungeonOrganism::ADungeonOrganism()
 	PrimaryActorTick.bCanEverTick = true;
 
 	stateComp = CreateDefaultSubobject<UStateComponent>(TEXT("StateComp"));
+
+	characterName = TEXT("Default");
 }
 
 // Called when the game starts or when spawned
 void ADungeonOrganism::BeginPlay()
 {
 	Super::BeginPlay();
+		
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("characterName : %s"), *characterName));
 
-	
+	stateComp->InitStat();
+	stateComp->UpdateStat();
 }
 
 // Called every frame

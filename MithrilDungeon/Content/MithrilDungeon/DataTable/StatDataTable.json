@@ -1,0 +1,23 @@
+[
+	{
+		"Name": "Default",
+		"MaxHP": 100,
+		"MaxSP": 100,
+		"Strength": 10,
+		"Agility": 10
+	},
+	{
+		"Name": "Player",
+		"MaxHP": 100,
+		"MaxSP": 100,
+		"Strength": 10,
+		"Agility": 10
+	},
+	{
+		"Name": "Skeleton",
+		"MaxHP": 200,
+		"MaxSP": 100,
+		"Strength": 20,
+		"Agility": 10
+	}
+]

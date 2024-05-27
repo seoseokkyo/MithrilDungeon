@@ -31,6 +31,8 @@ AEnemy::AEnemy()
 	boxComp->SetupAttachment(swordComp);
 	boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
 	boxComp->SetRelativeScale3D(FVector(0.1,0.1,2.2));
+
+	characterName = TEXT("Skeleton");
 }
 
 
@@ -81,7 +83,11 @@ void AEnemy::Tick(float DeltaTime)
 	default:
 		break;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
+
+	if (0)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
+	}	
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)

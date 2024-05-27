@@ -43,7 +43,7 @@ protected:
 
 	FString characterName;
 
-	UStateComponent* stateComp;
+
 
 public:	
 	// Called every frame
@@ -54,13 +54,17 @@ public:
 
 private:
 
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	UStateComponent* stateComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	ECharacterType characterType;
+	
 	UPROPERTY(EditDefaultsOnly, Category = "MySettings")
 	UAnimMontage* hitReaction;	
 
 	ECharacterMotionState motionState = ECharacterMotionState::Idle;
-
-public:
-	ECharacterType characterType;
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 

@@ -11,6 +11,7 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "MithrilDungeonGameInstance.h"
+#include "BaseWeapon.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -72,7 +73,18 @@ void AMithrilDungeonCharacter::BeginPlay()
 		}
 	}
 
-	stateComp->InitStat();
+	FActorSpawnParameters spawnParam;
+	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
+	spawnParam.Owner = this;
+	spawnParam.Instigator = this;
+
+	ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+
+	if (equipment)
+	{
+		equipment->OnEquipped();
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

@@ -56,18 +56,31 @@ public:
 
 private:
 
-	FCharacterStat stat;
-
-	float currentHP = 0.0f;
-	float MaxHP = 0.0f;
-	float currentSP = 0.0f;
-	float MaxSP = 0.0f;
-	int32 currentStrength = 0;
-	int32 currentAgility = 0;
-
 	ADungeonOrganism* character;
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	FCharacterStat stat;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float currentHP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float MaxHP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float currentSP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float MaxSP = 0.0f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	int32 currentStrength = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	int32 currentAgility = 0;
+
 
 	void InitStat();
 

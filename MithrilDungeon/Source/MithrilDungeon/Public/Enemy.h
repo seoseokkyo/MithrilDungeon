@@ -3,7 +3,7 @@
 #pragma once
 
 #include "CoreMinimal.h"
-#include "GameFramework/Character.h"
+#include "DungeonOrganism.h"
 #include "Enemy.generated.h"
 
 UENUM(BlueprintType)
@@ -20,7 +20,7 @@ enum class EEnemyState : uint8
 
 
 UCLASS()
-class MITHRILDUNGEON_API AEnemy : public ACharacter
+class MITHRILDUNGEON_API AEnemy : public ADungeonOrganism
 {
 	GENERATED_BODY()
 

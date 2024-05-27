@@ -24,8 +24,6 @@ void UStateComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-
-	UpdateStat();
 }
 
 
@@ -48,7 +46,12 @@ void UStateComponent::InitStat()
 	auto gi = GetOwner()->GetGameInstance<UMithrilDungeonGameInstance>();
 	if (gi != nullptr)
 	{
-		FCharacterStat characterStat = gi->GetCharacterDataTable(character->GetName());
+		stat = gi->GetCharacterDataTable(character->GetName());
+
+		currentHP = stat.MaxHP;
+		currentSP = stat.MaxSP;
+		currentStrength = stat.Strength;
+		currentAgility = stat.Agility;
 	}
 	else
 	{
@@ -102,7 +105,7 @@ void UStateComponent::UpdateStat()
 
 
 	// 이후 장비에 있는 스탯을 여기에 추가해줘야 함
-	stat.MaxHP = MaxHP;
-	stat.MaxSP = MaxSP;
+	MaxHP = stat.MaxHP;
+	MaxSP = stat.MaxSP;
 }
 
