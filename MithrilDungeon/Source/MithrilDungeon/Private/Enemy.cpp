@@ -3,7 +3,7 @@
 
 #include "Enemy.h"
 #include "AIController.h"
-#include "../MithrilDungeonCharacter.h"
+#include "MithrilDungeonCharacter.h"
 #include "NavigationSystem.h"
 #include "NavigationPath.h"
 #include "NavigationInvokerComponent.h"
