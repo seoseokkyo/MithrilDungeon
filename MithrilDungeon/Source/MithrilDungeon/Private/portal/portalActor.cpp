@@ -4,6 +4,7 @@
 #include "portal/portalActor.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
+#include "MithrilDungeonCharacter.h"
 
 // Sets default values
 AportalActor::AportalActor()
@@ -26,7 +27,7 @@ void AportalActor::BeginPlay()
 {
 	Super::BeginPlay();
 	
-	portalComp->SetVisibility(false);
+	//portalComp->SetVisibility(false);
 
 	portalComp->OnComponentBeginOverlap.AddDynamic(this, &AportalActor::BeginOverlap);
 
@@ -57,11 +58,13 @@ void AportalActor::portalCreate()
 void AportalActor::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {
 	// 오버랩 된 사람이 플레이어라면
-	// PortalActor = Cast<APortalActor>(OtherActor);
-	//if (OtherActor->IsA(Player))
-	//	{ 
-	// 로비로 나가기
+	Player = Cast<AMithrilDungeonCharacter>(OtherActor);
+		if (OtherActor->IsA<AMithrilDungeonCharacter>())
+		{
+			// 로비로 나가기
 	//UGameplayStatics::OpenLevel(this, "lobbyLevel");
-	//	}
+			UE_LOG(LogTemp, Warning, TEXT("Level"));
+				
+		}
 }
 

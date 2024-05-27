@@ -11,6 +11,8 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "MithrilDungeonGameInstance.h"
+#include "inventory/inventoryWidget.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,6 +58,9 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 
 	characterName = TEXT("Player");
 
+
+	inventoryComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPComp"));
+	inventoryComp->SetupAttachment(RootComponent);
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -71,8 +76,11 @@ void AMithrilDungeonCharacter::BeginPlay()
 			Subsystem->AddMappingContext(DefaultMappingContext, 0);
 		}
 	}
-
+	
 	stateComp->InitStat();
+	inventoryWidget = Cast<UinventoryWidget>(inventoryComp->GetWidget());
+	inventoryWidget->inventoryOpen();
+
 }
 
 //////////////////////////////////////////////////////////////////////////

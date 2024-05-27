@@ -81,7 +81,7 @@ void AEnemy::Tick(float DeltaTime)
 	default:
 		break;
 	}
-	UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
+	//UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -149,7 +149,7 @@ void AEnemy::OnDamaged(int32 dmg)
 
 void AEnemy::SearchPlayer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("sug"));
+	//UE_LOG(LogTemp, Warning, TEXT("sug"));
 
 	FVector Start = GetActorLocation();
 	FVector End = Player->GetActorLocation();
