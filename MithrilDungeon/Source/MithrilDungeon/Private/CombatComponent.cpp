@@ -4,6 +4,7 @@
 #include "CombatComponent.h"
 #include "BaseWeapon.h"
 #include <GameFramework/Character.h>
+#include "AnimInstance_Interface.h"
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -22,7 +23,7 @@ void UCombatComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+
 }
 
 
@@ -42,7 +43,7 @@ void UCombatComponent::SetMainWeapon(ABaseWeapon* baseWeapon)
 		mainWeapon->OnUnEquipped();
 		mainWeapon->Destroy();
 	}
-	
+
 	mainWeapon = baseWeapon;
 }
 
@@ -62,8 +63,19 @@ void UCombatComponent::SetCombatEnabled(bool bEnable)
 	*	4. Mesh에서 GetAnimInstance
 	*	5. GetAnimInstance로 IAnimInstance_Interface변환이 가능할 경우 UpdateCombatEnabled호출
 	*/
-
-	//Cast<IAnimInstance_Interface>(Cast<ACharacter>(GetOwner())->GetMesh()->GetAnimInstance())->UpdateCombatEnabled(bCombatEnable);
+	ACharacter* player = Cast<ACharacter>(GetOwner());
+	if (player != nullptr)
+	{
+		USkeletalMeshComponent* meshComp = player->GetMesh();
+		if (meshComp != nullptr)
+		{
+			IAnimInstance_Interface* animInterface = Cast<IAnimInstance_Interface>(meshComp->GetAnimInstance());
+			if (animInterface != nullptr)
+			{
+				animInterface->UpdateCombatEnabled_Implementation(bCombatEnable);
+			}
+		}
+	}
 }
 
 bool UCombatComponent::CheckCombatEnabled()

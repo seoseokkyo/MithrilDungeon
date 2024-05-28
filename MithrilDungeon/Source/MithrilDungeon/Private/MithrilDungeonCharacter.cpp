@@ -107,7 +107,7 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMithrilDungeonCharacter::Look);
 
-		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::AttackFunction);
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::LightAttackFunction);
 	}
 	else
 	{
@@ -151,9 +151,28 @@ void AMithrilDungeonCharacter::Look(const FInputActionValue& Value)
 	}
 }
 
-void AMithrilDungeonCharacter::AttackFunction(const FInputActionValue& Value)
+void AMithrilDungeonCharacter::LightAttackFunction(const FInputActionValue& Value)
 {
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AttackFunction Call")));
+	if (combatComponent->bAttacking)
+	{
+		combatComponent->bAttackSaved = true;
+	}
+	else
+	{
+		AttackEvent();
+	}
 
-	PlayAnimMontage(combatComponent->mainWeapon->attackMontages[0]);
+	bOnAttack = true;
+
+	FTimerHandle GravityTimerHandle;
+	float GravityTime = 0.5f;
+
+	GetWorld()->GetTimerManager().SetTimer(GravityTimerHandle, FTimerDelegate::CreateLambda([&]()
+		{
+			// 코드 구현
+			bOnAttack = false;
+
+			// TimerHandle 초기화
+			GetWorld()->GetTimerManager().ClearTimer(GravityTimerHandle);
+		}), GravityTime, false);
 }

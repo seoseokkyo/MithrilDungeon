@@ -10,14 +10,16 @@ UCollisionComponent::UCollisionComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = true;
 
-	// ...
 	this->startSocketName = FName("Weapon Start");
 	this->endSocketName = FName("Weapon End");
 	this->traceRadius = 20;
 	this->drawDebugType = EDrawDebugTrace::Persistent;
 
 	collisionObjectTypes.Reset();
-	collisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_PhysicsBody));
+	collisionObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery3);
+
+
+	// ...
 }
 
 
@@ -25,9 +27,6 @@ UCollisionComponent::UCollisionComponent()
 void UCollisionComponent::BeginPlay()
 {
 	Super::BeginPlay();
-
-	// ...
-	
 }
 
 
@@ -36,14 +35,11 @@ void UCollisionComponent::TickComponent(float DeltaTime, ELevelTick TickType, FA
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
-	// ...
-
 	if (bCollisionEnabled)
 	{
 		CollisionTrace();
 	}
 }
-
 
 void UCollisionComponent::SetCollisionMesh(UPrimitiveComponent* meshComp)
 {
@@ -67,6 +63,22 @@ void UCollisionComponent::ClearHitActor()
 
 void UCollisionComponent::CollisionTrace()
 {
+	/*
+		const UObject* WorldContextObject,
+		const FVector Start,
+		const FVector End,
+		float Radius,
+		const TArray<TEnumAsByte<EObjectTypeQuery> > & ObjectTypes,
+		bool bTraceComplex,
+		const TArray<AActor*>& ActorsToIgnore,
+		EDrawDebugTrace::Type DrawDebugType,
+		TArray<FHitResult>& OutHits,
+		bool bIgnoreSelf,
+		FLinearColor TraceColor,
+		FLinearColor TraceHitColor,
+		float DrawTime
+	*/
+
 	FVector startSocketLocation = collisionMeshComponent->GetSocketLocation(startSocketName);
 	FVector endSocketLocation = collisionMeshComponent->GetSocketLocation(endSocketName);
 
@@ -74,7 +86,7 @@ void UCollisionComponent::CollisionTrace()
 
 	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), startSocketLocation, endSocketLocation, traceRadius, collisionObjectTypes, false, actorsToIgnore, drawDebugType, arrayHits, true, FLinearColor::Red, FLinearColor::Green);
 
-	for (FHitResult elem : arrayHits)
+	for (const FHitResult& elem : arrayHits)
 	{
 		lastHitStruct = elem;
 

@@ -6,41 +6,53 @@
 #include "BaseWeapon.h"
 #include "CollisionComponent.h"
 
+
 void UCollisionTrace_ANs::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
-	//TSubclassOf<UCombatComponent> combatComp;
-	auto compCheck = Cast<UCombatComponent>(MeshComp->GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
-
-	if (compCheck)
+	if (MeshComp != nullptr)
 	{
-		ABaseWeapon* mainWeapon = compCheck->GetMainWeapon();
-		if (mainWeapon != nullptr)
+		AActor* owenrActor = MeshComp->GetOwner();
+		if (owenrActor != nullptr)
 		{
-			mainWeapon->collisionComponent->SetEnableCollision(true);
+			UCombatComponent* combatComp = owenrActor->GetComponentByClass<UCombatComponent>();
+
+			if (combatComp != nullptr)
+			{
+				ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
+
+				if (IsValid(mainWeapon))
+				{
+					if (mainWeapon->collisionComponent != nullptr)
+					{
+						mainWeapon->collisionComponent->SetEnableCollision(true);	// Enable
+					}
+				}
+			}
 		}
-	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UCollisionTrace_ANs::NotifyBegin - NullptrErr"));
 	}
 }
 
-void UCollisionTrace_ANs::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
+void UCollisionTrace_ANs::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
-	//TSubclassOf<UCombatComponent> combatComp;
-	auto compCheck = Cast<UCombatComponent>(MeshComp->GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
-
-	if (compCheck)
+	if (MeshComp != nullptr)
 	{
-		ABaseWeapon* mainWeapon = compCheck->GetMainWeapon();
-		if (mainWeapon != nullptr)
+		AActor* owenrActor = MeshComp->GetOwner();
+		if (owenrActor != nullptr)
 		{
-			mainWeapon->collisionComponent->SetEnableCollision(false);
+			UCombatComponent* combatComp = owenrActor->GetComponentByClass<UCombatComponent>();
+
+			if (combatComp != nullptr)
+			{
+				ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
+
+				if (IsValid(mainWeapon))
+				{
+					if (mainWeapon->collisionComponent != nullptr)
+					{
+						mainWeapon->collisionComponent->SetEnableCollision(false);	// Disable
+					}
+				}
+			}
 		}
 	}
-	else
-	{
-		UE_LOG(LogTemp, Warning, TEXT("UCollisionTrace_ANs::NotifyEnd - NullptrErr"));
-	}
 }
-

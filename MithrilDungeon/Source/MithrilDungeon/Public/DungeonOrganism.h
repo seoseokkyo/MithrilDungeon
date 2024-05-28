@@ -56,6 +56,11 @@ public:
 private:
 
 public:
+
+	bool bToggleCombatAnimPlay;
+	bool bOnAttack;
+	bool bDead;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UStateComponent* stateComp;
 	
@@ -70,10 +75,25 @@ public:
 
 	ECharacterMotionState motionState = ECharacterMotionState::Idle;
 
-	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+	virtual void ContinueAttack_Implementation() override;
+	virtual void ResetCombat_Implementation() override;
+	virtual bool CanReceiveDamage_Implementation() override;
 
-	// 이건 그냥 캐릭터마다 만드는게 속 편하겠다
-	void Attack();
+	TArray<int32> attackDamageArray;
+
+	//virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+
+
+	FName pelvisBoneName = TEXT("Pelvis");
+
+
+	UFUNCTION(BlueprintCallable)
+	void AttackEvent();
+
+	UFUNCTION(BlueprintCallable)
+	void PerformAttack(int32 attackIndex, bool bUseRandom);
+
+	void EnableRagdoll();
 
 	FString GetName() {return characterName;};
 };

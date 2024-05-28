@@ -24,13 +24,11 @@ class MITHRILDUNGEON_API IAnimInstance_Interface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void UpdateCombatType(E_WeaponType eType);
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void UpdateCombatType(EWeaponType eType);
+	virtual void UpdateCombatType_Implementation(EWeaponType eType) PURE_VIRTUAL(IAnimInstanceInterface::UpdateCombatType_Implementation, return;);
 
-	virtual void UpdateCombatType_Implementation(E_WeaponType eType) = 0;
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void UpdateCombatEnable(bool bEnable);
-
-	virtual void UpdateCombatEnable_Implementation(bool bEnable) = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void UpdateCombatEnabled(bool bEnable);
+	virtual void UpdateCombatEnabled_Implementation(bool bEnable) PURE_VIRTUAL(IAnimInstanceInterface::UpdateCombatEnabled_Implementation, return;);
 };

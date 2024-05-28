@@ -6,7 +6,9 @@
 #include <Kismet/GameplayStatics.h>
 #include "CollisionComponent.h"
 #include "CombatComponent.h"
+#include "CombatInterface.h"
 #include "AnimInstance_Interface.h"
+
 
 ABaseWeapon::ABaseWeapon()
 {
@@ -17,10 +19,14 @@ ABaseWeapon::ABaseWeapon()
 void ABaseWeapon::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	if (collisionComponent != nullptr)
 	{
 		collisionComponent->onHitDeligate.BindUObject(this, &ABaseWeapon::OnHitCollisionComponent);
+	}
+	else
+	{
+		int iTemp = 0;
 	}
 }
 
@@ -37,13 +43,7 @@ void ABaseWeapon::OnEquipped()
 		combatComponent = GetOwner()->GetComponentByClass<UCombatComponent>();
 		if (combatComponent != nullptr)
 		{
-			UE_LOG(LogTemp, Warning, TEXT("handSocketName : %s"), *handSocketName.ToString());
-			UE_LOG(LogTemp, Warning, TEXT("AttachSocketName : %s"), *AttachSocketName.ToString());
-
 			FName selectedName = (combatComponent->bCombatEnable ? handSocketName : AttachSocketName);
-
-			UE_LOG(LogTemp, Warning, TEXT("CombatComponent.bCombatEnable : %d"), combatComponent->bCombatEnable);
-			UE_LOG(LogTemp, Warning, TEXT("selectedName : %s"), *selectedName.ToString());
 
 			AttachActor(selectedName);
 
@@ -55,17 +55,22 @@ void ABaseWeapon::OnEquipped()
 				USkeletalMeshComponent* skeletalMeshComponent = characterPtr->GetMesh();
 				if (skeletalMeshComponent)
 				{
-					auto animInstance = skeletalMeshComponent->GetAnimClass();
+					UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
 
-					if (animInstance->ImplementsInterface(UAnimInstance_Interface::StaticClass()))
+					if (animInstance != nullptr)
 					{
-						IAnimInstance_Interface::Execute_UpdateCombatType(animInstance, eWeaponType);
-					
-						UE_LOG(LogTemp, Warning, TEXT("%s Send UUpdateCombatType"), *animInstance->GetName());
-					}
-					else
-					{
-						UE_LOG(LogTemp, Warning, TEXT("%s Is do not Have IAnimInstance_Interface"), *skeletalMeshComponent->GetName());
+						IAnimInstance_Interface* AnimInterface = Cast<IAnimInstance_Interface>(animInstance);
+
+						if (AnimInterface != nullptr)
+						{
+							AnimInterface->UpdateCombatType_Implementation(eWeaponType);
+
+							UE_LOG(LogTemp, Warning, TEXT("%s Send UUpdateCombatType"), *animInstance->GetName());
+						}
+						else
+						{
+							UE_LOG(LogTemp, Warning, TEXT("%s Is do not Have IAnimInstance_Interface"), *skeletalMeshComponent->GetName());
+						}
 					}
 				}
 				else
@@ -94,30 +99,24 @@ void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 
 	AActor* hitActor = lastHitStruct.GetActor();
 
-	FVector hitFromDirection = GetOwner()->GetActorForwardVector();
-	TSubclassOf<UDamageType> damageTypeClass = {};
-	
-	//<< 이거 damageTypeClass랑 블루프린트의 기본값이랑 차이가 있는지 확인필요
-	UGameplayStatics::ApplyPointDamage(hitActor, weaponDamage, hitFromDirection, lastHitStruct, GetInstigatorController(), this, damageTypeClass);
+	if (Cast<ICombatInterface>(hitActor)->CanReceiveDamage())
+	{
+		/*
+			 AActor* DamagedActor,
+			 float BaseDamage,
+			 FVector const& HitFromDirection,
+			 FHitResult const& HitInfo,
+			 AController* EventInstigator,
+			 AActor* DamageCauser,
+			 TSubclassOf<UDamageType> DamageTypeClass
+		*/
 
-	//if (Cast<ICombat_Interface>(hitActor)->CanReceiveDamage())
-	//{
-	//	/*
-	//		 AActor* DamagedActor, 
-	//		 float BaseDamage, 
-	//		 FVector const& HitFromDirection, 
-	//		 FHitResult const& HitInfo, 
-	//		 AController* EventInstigator, 
-	//		 AActor* DamageCauser, 
-	//		 TSubclassOf<UDamageType> DamageTypeClass
-	//	*/
+		FVector hitFromDirection = GetOwner()->GetActorForwardVector();
+		TSubclassOf<UDamageType> damageTypeClass = {};
 
-	//	FVector hitFromDirection = GetOwner()->GetActorForwardVector();
-	//	TSubclassOf<UDamageType> damageTypeClass = {};
-
-	//	//<< 이거 damageTypeClass랑 블루프린트의 기본값이랑 차이가 있는지 확인필요
-	//	UGameplayStatics::ApplyPointDamage(hitActor, weaponDamage, hitFromDirection, lastHitStruct, GetInstigatorController(), this, damageTypeClass);
-	//}
+		//<< 이거 damageTypeClass랑 블루프린트의 기본값이랑 차이가 있는지 확인필요
+		UGameplayStatics::ApplyPointDamage(hitActor, weaponDamage, hitFromDirection, lastHitStruct, GetInstigatorController(), this, damageTypeClass);
+	}
 }
 
 void ABaseWeapon::SimulateWeaponPhysics()

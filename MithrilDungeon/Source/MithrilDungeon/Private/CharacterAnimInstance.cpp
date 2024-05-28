@@ -3,12 +3,12 @@
 
 #include "CharacterAnimInstance.h"
 
-void UCharacterAnimInstance::UpdateCombatType_Implementation(E_WeaponType eType)
+void UCharacterAnimInstance::UpdateCombatType_Implementation(EWeaponType eType)
 {
 	weaponType = eType;
 }
 
-void UCharacterAnimInstance::UpdateCombatEnable_Implementation(bool bEnable)
+void UCharacterAnimInstance::UpdateCombatEnabled_Implementation(bool bEnable)
 {
 	bCombatEnable = bEnable;
 }

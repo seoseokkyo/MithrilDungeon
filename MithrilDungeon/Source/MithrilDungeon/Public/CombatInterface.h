@@ -23,8 +23,23 @@ class MITHRILDUNGEON_API ICombatInterface
 	// Add interface functions to this class. This is the class that will be inherited to implement this interface.
 public:
 
-	//UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
-	//void Attack(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser);
-	//
-	//virtual void Attack_Implementation(float DamageAmount, FDamageEvent const& DamageEvent) = 0;
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ContinueAttack();
+	virtual void ContinueAttack_Implementation() PURE_VIRTUAL(ICombatInterface::ContinueAttack_Implementation, return;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ResetAttack();
+	virtual void ResetAttack_Implementation() PURE_VIRTUAL(ICombatInterface::ResetAttack_Implementation, return;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	FRotator GetDesireRotation();
+	virtual FRotator GetDesireRotation_Implementation() PURE_VIRTUAL(ICombatInterface::GetDesireRotation_Implementation, return FRotator::ZeroRotator;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	void ResetCombat();
+	virtual void ResetCombat_Implementation() PURE_VIRTUAL(ICombatInterface::ResetCombat_Implementation, return;);
+
+	UFUNCTION(BlueprintCallable, BlueprintNativeEvent)
+	bool CanReceiveDamage();
+	virtual bool CanReceiveDamage_Implementation() PURE_VIRTUAL(ICombatInterface::CanReceiveDamage_Implementation, return bool(false););
 };

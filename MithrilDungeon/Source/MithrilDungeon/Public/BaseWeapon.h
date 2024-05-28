@@ -15,7 +15,7 @@ class UCombatComponent;
 class UAnimMontage;
  
 UENUM(BlueprintType)
-enum class E_WeaponType : uint8
+enum class EWeaponType : uint8
 {
 	None = 0				UMETA(DisplayName = "None"),
 	LightSword				UMETA(DisplayName = "LightSword"),
@@ -47,7 +47,7 @@ public:
 	FName handSocketName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Initialization")
-	E_WeaponType			eWeaponType;
+	EWeaponType			eWeaponType;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Animations")
 	UAnimMontage*			enterCombatMontage;

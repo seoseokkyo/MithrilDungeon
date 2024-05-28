@@ -18,11 +18,11 @@ class MITHRILDUNGEON_API UCharacterAnimInstance : public UAnimInstance, public I
 public:
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	E_WeaponType weaponType = E_WeaponType::None;
+	EWeaponType weaponType = EWeaponType::None;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCombatEnable = false;
 
-	virtual void UpdateCombatType_Implementation(E_WeaponType eType) override;
-	virtual void UpdateCombatEnable_Implementation(bool bEnable) override;
+	virtual void UpdateCombatType_Implementation(EWeaponType eType) override;
+	virtual void UpdateCombatEnabled_Implementation(bool bEnable) override;
 };

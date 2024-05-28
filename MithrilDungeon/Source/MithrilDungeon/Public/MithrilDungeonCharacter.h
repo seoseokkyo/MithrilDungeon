@@ -61,7 +61,7 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
-	void AttackFunction(const FInputActionValue& Value);
+	void LightAttackFunction(const FInputActionValue& Value);
 
 protected:
 	// APawn interface
