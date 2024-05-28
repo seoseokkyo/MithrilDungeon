@@ -6,6 +6,7 @@
 #include <Kismet/GameplayStatics.h>
 #include "CollisionComponent.h"
 #include "CombatComponent.h"
+#include "AnimInstance_Interface.h"
 
 ABaseWeapon::ABaseWeapon()
 {
@@ -56,16 +57,16 @@ void ABaseWeapon::OnEquipped()
 				{
 					auto animInstance = skeletalMeshComponent->GetAnimClass();
 
-					//if (animInstance->ImplementsInterface(UAnimInstance_Interface::StaticClass()))
-					//{
-					//	IAnimInstance_Interface::Execute_UpdateCombatType(animInstance, eWeaponType);
-					//
-					//	UE_LOG(LogTemp, Warning, TEXT("%s Send UUpdateCombatType"), *animInstance->GetName());
-					//}
-					//else
-					//{
-					//	UE_LOG(LogTemp, Warning, TEXT("%s Is do not Have IAnimInstance_Interface"), *skeletalMeshComponent->GetName());
-					//}
+					if (animInstance->ImplementsInterface(UAnimInstance_Interface::StaticClass()))
+					{
+						IAnimInstance_Interface::Execute_UpdateCombatType(animInstance, eWeaponType);
+					
+						UE_LOG(LogTemp, Warning, TEXT("%s Send UUpdateCombatType"), *animInstance->GetName());
+					}
+					else
+					{
+						UE_LOG(LogTemp, Warning, TEXT("%s Is do not Have IAnimInstance_Interface"), *skeletalMeshComponent->GetName());
+					}
 				}
 				else
 				{

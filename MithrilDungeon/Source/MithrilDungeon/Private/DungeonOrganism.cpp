@@ -4,6 +4,7 @@
 #include "DungeonOrganism.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Engine/DamageEvents.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include "CombatComponent.h"
 
 // Sets default values
 ADungeonOrganism::ADungeonOrganism()
@@ -12,6 +13,8 @@ ADungeonOrganism::ADungeonOrganism()
 	PrimaryActorTick.bCanEverTick = true;
 
 	stateComp = CreateDefaultSubobject<UStateComponent>(TEXT("StateComp"));
+
+	combatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
 
 	characterName = TEXT("Default");
 }

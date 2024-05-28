@@ -8,8 +8,8 @@
 
 void UCollisionTrace_ANs::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, float TotalDuration)
 {
-	TSubclassOf<UCombatComponent> combatComp;
-	auto compCheck = Cast<UCombatComponent>(MeshComp->GetOwner()->GetComponentByClass(combatComp));
+	//TSubclassOf<UCombatComponent> combatComp;
+	auto compCheck = Cast<UCombatComponent>(MeshComp->GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
 
 	if (compCheck)
 	{
@@ -27,8 +27,8 @@ void UCollisionTrace_ANs::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 
 void UCollisionTrace_ANs::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation, const FAnimNotifyEventReference& EventReference)
 {
-	TSubclassOf<UCombatComponent> combatComp;
-	auto compCheck = Cast<UCombatComponent>(MeshComp->GetOwner()->GetComponentByClass(combatComp));
+	//TSubclassOf<UCombatComponent> combatComp;
+	auto compCheck = Cast<UCombatComponent>(MeshComp->GetOwner()->GetComponentByClass(UCombatComponent::StaticClass()));
 
 	if (compCheck)
 	{

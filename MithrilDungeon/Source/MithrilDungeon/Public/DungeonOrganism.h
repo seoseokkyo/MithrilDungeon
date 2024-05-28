@@ -27,6 +27,7 @@ enum class ECharacterMotionState : int8
 };
 
 class UAnimMontage;
+class UCombatComponent;
 
 UCLASS()
 class MITHRILDUNGEON_API ADungeonOrganism : public ACharacter, public ICombatInterface
@@ -57,6 +58,9 @@ private:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UStateComponent* stateComp;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UCombatComponent* combatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	ECharacterType characterType;

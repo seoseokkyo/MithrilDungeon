@@ -12,6 +12,8 @@
 #include "InputActionValue.h"
 #include "MithrilDungeonGameInstance.h"
 #include "BaseWeapon.h"
+#include "CombatComponent.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -104,6 +106,8 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMithrilDungeonCharacter::Look);
+
+		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::AttackFunction);
 	}
 	else
 	{
@@ -145,4 +149,11 @@ void AMithrilDungeonCharacter::Look(const FInputActionValue& Value)
 		AddControllerYawInput(LookAxisVector.X);
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
+}
+
+void AMithrilDungeonCharacter::AttackFunction(const FInputActionValue& Value)
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("AttackFunction Call")));
+
+	PlayAnimMontage(combatComponent->mainWeapon->attackMontages[0]);
 }
