@@ -73,6 +73,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class UAnimMontage* death_Montage;
 
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	class UAnimMontage* HitReact_Montage;
+
 	void Idle();
 	void MoveTotaget();
 	void Attack();

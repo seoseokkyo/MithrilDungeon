@@ -70,10 +70,10 @@ void AEnemy::Tick(float DeltaTime)
 		
 		break;
 	case EEnemyState::RETURN:
-	
+
 		break;
 	case EEnemyState::DAMAGED:
-		
+
 		break;
 	case EEnemyState::DIE:
 		Die();
@@ -129,8 +129,14 @@ void AEnemy::Attack()
 
 void AEnemy::Die()
 {
-	//Destroy();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		PlayAnimMontage(death_Montage);
+		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
+	}
 }
+
 
 
 void AEnemy::OnDamaged(int32 dmg)
@@ -139,10 +145,18 @@ void AEnemy::OnDamaged(int32 dmg)
 	if (EnemyCurrentHP <= 0)
 	{
 		enemyState = EEnemyState::DIE;
+
+
 	}
 	else
 	{
 		enemyState = EEnemyState::DAMAGED;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			PlayAnimMontage(HitReact_Montage);
+			UE_LOG(LogTemp, Warning, TEXT("HitReactAM!!"))
+		}
 	}
 
 }

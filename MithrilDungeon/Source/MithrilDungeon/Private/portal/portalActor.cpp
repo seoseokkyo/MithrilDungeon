@@ -5,22 +5,28 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 #include "MithrilDungeonCharacter.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Components/SphereComponent.h>
 
 // Sets default values
 AportalActor::AportalActor()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
+	SphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("SphereComp"));
+	SetRootComponent(SphereComp);
+
 	meshComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("meshComp"));
 	meshComp->SetupAttachment(RootComponent);
+	//meshComp->SetupAttachment(RootComponent);
 
-	
 	portalComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("portalComp"));
 	portalComp->SetupAttachment(RootComponent);
+	portalComp->SetRelativeLocation(FVector(0, 0, 300));
 
 	// 오버랩 되게 설정
 	portalComp->SetGenerateOverlapEvents(true);
 
+	
 }
 
 void AportalActor::BeginPlay()
