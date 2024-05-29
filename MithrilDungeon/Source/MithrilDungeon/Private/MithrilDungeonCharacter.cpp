@@ -98,6 +98,7 @@ void AMithrilDungeonCharacter::BeginPlay()
 	if (inventoryWidget != nullptr)
 	{
 		inventoryWidget->inventoryOpen();
+		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
 	}	
 }
 
@@ -122,6 +123,9 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::LightAttackFunction);
 
 		EnhancedInputComponent->BindAction(ToggleCombatAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleCombatFunction);
+
+		// 인벤토리 열고닫기
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);
 	}
 	else
 	{
@@ -247,4 +251,28 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 			}, animPlayTime, false, 1.0f);
 		}
 	}
+}
+
+void AMithrilDungeonCharacter::InventoryOnOff(const FInputActionValue& Value)
+{
+	// 인벤토리 온으로 변경
+	if (!bInventorystate)
+	{
+		if (inventoryWidget != nullptr)
+		{
+			inventoryWidget->SetVisibility(ESlateVisibility::Visible);
+			bInventorystate = true;
+		}
+	}
+
+	// 인벤토리 오프로 변경
+	else
+	{
+		if (inventoryWidget != nullptr)
+		{ 
+			inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+			bInventorystate = false;
+		}
+	}
+
 }

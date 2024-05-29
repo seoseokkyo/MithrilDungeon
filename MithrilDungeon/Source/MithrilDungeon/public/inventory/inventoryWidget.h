@@ -25,7 +25,6 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = TPS)
 	TSubclassOf<class UUserWidget> inventoryBox;
 
-
 	void inventoryOpen();
 
 
