@@ -1,7 +1,7 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
 
-#include "Enemy.h"
+#include "Boss/Boss.h"
 #include "AIController.h"
 #include "MithrilDungeonCharacter.h"
 #include "NavigationSystem.h"
@@ -16,8 +16,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
 
 
-// Sets default values
-AEnemy::AEnemy()
+ABoss::ABoss()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
@@ -31,13 +30,13 @@ AEnemy::AEnemy()
 	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
 	boxComp->SetupAttachment(swordComp);
 	boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
-	boxComp->SetRelativeScale3D(FVector(0.1,0.1,2.2));
+	boxComp->SetRelativeScale3D(FVector(0.1, 0.1, 2.2));
 
 	characterName = TEXT("Skeleton");
 }
 
 
-void AEnemy::BeginPlay()
+void ABoss::BeginPlay()
 {
 	Super::BeginPlay();
 
@@ -50,35 +49,35 @@ void AEnemy::BeginPlay()
 	aiCon = GetController<AAIController>();
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
-	enemyState = EEnemyState::IDLE;
-	
+	enemyState = EBoseState::IDLE;
+
 }
 
-void AEnemy::Tick(float DeltaTime)
+void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
 	switch (enemyState)
 	{
-	case EEnemyState::IDLE:
+	case EBoseState::IDLE:
 		Idle();
 		break;
-	case EEnemyState::MOVE:
+	case EBoseState::MOVE:
 		MoveTotaget();
 		break;
-	case EEnemyState::ATTACK:
+	case EBoseState::ATTACK:
 		Attack();
 		break;
-	case EEnemyState::ATTACKDELAY:
+	case EBoseState::ATTACKDELAY:
 		AttackDelay();
 		break;
-	case EEnemyState::RETURN:
+	case EBoseState::RETURN:
 
 		break;
-	case EEnemyState::DAMAGED:
+	case EBoseState::DAMAGED:
 
 		break;
-	case EEnemyState::DIE:
+	case EBoseState::DIE:
 		Die();
 		break;
 	default:
@@ -104,37 +103,37 @@ void AEnemy::Tick(float DeltaTime)
 	//UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
 }
 
-void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
+void ABoss::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
 }
 
-void AEnemy::Idle()
+void ABoss::Idle()
 {
 	SearchPlayer();
-	
+
 
 }
 
-void AEnemy::MoveTotaget()
+void ABoss::MoveTotaget()
 {
-	 targetLoc = Player->GetActorLocation();
+	targetLoc = Player->GetActorLocation();
 	if (aiCon != nullptr)
 	{
-		if (FVector::Distance(GetActorLocation(), targetLoc) < limitDistance && FVector::Distance(GetActorLocation(),targetLoc) > attackDistance)
-		{ 
+		if (FVector::Distance(GetActorLocation(), targetLoc) < limitDistance && FVector::Distance(GetActorLocation(), targetLoc) > attackDistance)
+		{
 			UE_LOG(LogTemp, Warning, TEXT("move!!"));
 			aiCon->MoveToActor(Player);
 		}
 		if (FVector::Distance(GetActorLocation(), targetLoc) <= attackDistance)
 		{
-			enemyState = EEnemyState::ATTACK;
+			enemyState = EBoseState::ATTACK;
 		}
 	}
 }
 
-void AEnemy::Attack()
+void ABoss::Attack()
 {
 	// 공격전 플레이어에게로 방향회전
 	FVector lookDir = Player->GetActorLocation() - GetActorLocation();
@@ -147,26 +146,26 @@ void AEnemy::Attack()
 	/*UE_LOG(LogTemp, Warning, TEXT("Attack!!"));*/
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	bAttack = true;
- 	if (AnimInstance && bAttack)
- 	{
+	if (AnimInstance && bAttack)
+	{
 		PlayAnimMontage(attack_Montage);
 		UE_LOG(LogTemp, Warning, TEXT("AttackAM!!"))
-		enemyState = EEnemyState::ATTACKDELAY;
+			enemyState = EBoseState::ATTACKDELAY;
 	}
-	
+
 }
 
-void AEnemy::AttackDelay()
+void ABoss::AttackDelay()
 {
 	aiCon->StopMovement();
 
 	FTimerHandle AttackTimer;
 	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [&]() {
-		enemyState = EEnemyState::IDLE;
-		},3,false);
+		enemyState = EBoseState::IDLE;
+		}, 3, false);
 }
 
-void AEnemy::Die()
+void ABoss::Die()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	if (AnimInstance)
@@ -178,18 +177,18 @@ void AEnemy::Die()
 
 
 
-void AEnemy::OnDamaged(int32 dmg)
+void ABoss::OnDamaged(int32 dmg)
 {
-	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP -dmg, 0,100);
+	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP - dmg, 0, 100);
 	if (EnemyCurrentHP <= 0)
 	{
-		enemyState = EEnemyState::DIE;
+		enemyState = EBoseState::DIE;
 
 
 	}
 	else
 	{
-		enemyState = EEnemyState::DAMAGED;
+		enemyState = EBoseState::DAMAGED;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance)
 		{
@@ -200,7 +199,7 @@ void AEnemy::OnDamaged(int32 dmg)
 
 }
 
-void AEnemy::SearchPlayer()
+void ABoss::SearchPlayer()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("sug"));
 
@@ -208,13 +207,10 @@ void AEnemy::SearchPlayer()
 	FVector End = Player->GetActorLocation();
 	if (FVector::Distance(Start, End) < 100)
 	{
-		enemyState = EEnemyState::IDLE;
+		enemyState = EBoseState::IDLE;
 	}
 	else
-	{ 
-		enemyState = EEnemyState::MOVE;
+	{
+		enemyState = EBoseState::MOVE;
 	}
 }
-
-
-

@@ -4,10 +4,10 @@
 
 #include "CoreMinimal.h"
 #include "DungeonOrganism.h"
-#include "Enemy.generated.h"
+#include "Boss.generated.h"
 
 UENUM(BlueprintType)
-enum class EEnemyState : uint8
+enum class EBoseState : uint8
 {
 	IDLE,		
 	MOVE,		
@@ -20,7 +20,7 @@ enum class EEnemyState : uint8
 
 
 UCLASS()
-class MITHRILDUNGEON_API AEnemy : public ADungeonOrganism
+class MITHRILDUNGEON_API ABoss : public ADungeonOrganism
 {
 	GENERATED_BODY()
 
@@ -28,13 +28,13 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	AEnemy();
+	ABoss();
 	virtual void Tick(float DeltaTime) override;
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
-	EEnemyState enemyState = EEnemyState::IDLE;
+	EBoseState enemyState = EBoseState::IDLE;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class UStaticMeshComponent* swordComp;
@@ -106,4 +106,7 @@ private:
 
 	UPROPERTY()
 	class AActor* target;
+
+	
+
 };
