@@ -31,8 +31,6 @@ AEnemy::AEnemy()
 	boxComp->SetupAttachment(swordComp);
 	boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
 	boxComp->SetRelativeScale3D(FVector(0.1,0.1,2.2));
-
-	characterName = TEXT("Skeleton");
 }
 
 
@@ -72,10 +70,10 @@ void AEnemy::Tick(float DeltaTime)
 		
 		break;
 	case EEnemyState::RETURN:
-	
+
 		break;
 	case EEnemyState::DAMAGED:
-		
+
 		break;
 	case EEnemyState::DIE:
 		Die();
@@ -83,11 +81,7 @@ void AEnemy::Tick(float DeltaTime)
 	default:
 		break;
 	}
-
-	if (0)
-	{
-		UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
-	}	
+	//UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -135,8 +129,14 @@ void AEnemy::Attack()
 
 void AEnemy::Die()
 {
-	//Destroy();
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		PlayAnimMontage(death_Montage);
+		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
+	}
 }
+
 
 
 void AEnemy::OnDamaged(int32 dmg)
@@ -145,17 +145,25 @@ void AEnemy::OnDamaged(int32 dmg)
 	if (EnemyCurrentHP <= 0)
 	{
 		enemyState = EEnemyState::DIE;
+
+
 	}
 	else
 	{
 		enemyState = EEnemyState::DAMAGED;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance)
+		{
+			PlayAnimMontage(HitReact_Montage);
+			UE_LOG(LogTemp, Warning, TEXT("HitReactAM!!"))
+		}
 	}
 
 }
 
 void AEnemy::SearchPlayer()
 {
-	UE_LOG(LogTemp, Warning, TEXT("sug"));
+	//UE_LOG(LogTemp, Warning, TEXT("sug"));
 
 	FVector Start = GetActorLocation();
 	FVector End = Player->GetActorLocation();

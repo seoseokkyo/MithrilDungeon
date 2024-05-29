@@ -55,6 +55,12 @@ class AMithrilDungeonCharacter : public ADungeonOrganism
 
 public:
 	AMithrilDungeonCharacter();
+
+	UPROPERTY(EditDefaultsOnly, Category = TPS)
+	class UWidgetComponent* inventoryComp;
+
+	class UinventoryWidget* inventoryWidget;
+
 	
 
 protected:
