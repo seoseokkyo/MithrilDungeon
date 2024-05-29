@@ -50,10 +50,10 @@ void ADungeonOrganism::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	// 맞는 방향으로 캐릭터 회전
-	FVector dir = DamageCauser->GetActorLocation() - GetActorLocation();
-
-	SetActorRotation(dir.GetSafeNormal().Rotation());
+	//// 맞는 방향으로 캐릭터 회전
+	//FVector dir = DamageCauser->GetActorLocation() - GetActorLocation();
+	//
+	//SetActorRotation(dir.GetSafeNormal().Rotation());
 
 	// State반영
 	if (stateComp != nullptr)
@@ -61,11 +61,11 @@ float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 		stateComp->AddStatePoint(HP, -DamageAmount);
 	}
 
-	// 히트 애니메이션 재생
-	if (hitReaction != nullptr)
-	{
-		PlayAnimMontage(hitReaction);
-	}
+	//// 히트 애니메이션 재생
+	//if (hitReaction != nullptr)
+	//{
+	//	PlayAnimMontage(hitReaction);
+	//}
 
 	// 디버그
 	if (1)

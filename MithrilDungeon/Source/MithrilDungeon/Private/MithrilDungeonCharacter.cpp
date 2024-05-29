@@ -94,7 +94,11 @@ void AMithrilDungeonCharacter::BeginPlay()
 	}
 	
 	inventoryWidget = Cast<UinventoryWidget>(inventoryComp->GetWidget());
-	inventoryWidget->inventoryOpen();
+
+	if (inventoryWidget != nullptr)
+	{
+		inventoryWidget->inventoryOpen();
+	}	
 }
 
 //////////////////////////////////////////////////////////////////////////

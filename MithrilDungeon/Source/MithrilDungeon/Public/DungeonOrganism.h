@@ -43,10 +43,6 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	FString characterName;
-
-
-
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
@@ -57,6 +53,9 @@ public:
 private:
 
 public:
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString characterName;
 
 	bool bDead;
 

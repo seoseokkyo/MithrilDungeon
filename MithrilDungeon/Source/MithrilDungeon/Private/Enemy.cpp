@@ -31,6 +31,8 @@ AEnemy::AEnemy()
 	boxComp->SetupAttachment(swordComp);
 	boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
 	boxComp->SetRelativeScale3D(FVector(0.1,0.1,2.2));
+
+	characterName = TEXT("Skeleton");
 }
 
 
