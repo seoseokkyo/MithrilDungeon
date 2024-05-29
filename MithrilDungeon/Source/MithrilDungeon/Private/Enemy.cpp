@@ -13,6 +13,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h>
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
+#include "BaseWeapon.h"
 
 
 // Sets default values
@@ -51,6 +52,21 @@ void AEnemy::BeginPlay()
 	// 기본 상태를 IDLE 상태로 초기화한다.
 	enemyState = EEnemyState::IDLE;
 	
+	if (characterName == TEXT("Skeleton"))
+	{
+		FActorSpawnParameters spawnParam;
+		spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
+		spawnParam.Owner = this;
+		spawnParam.Instigator = this;
+
+		ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+
+		if (equipment)
+		{
+			equipment->OnEquipped();
+		}
+	}
 }
 
 void AEnemy::Tick(float DeltaTime)

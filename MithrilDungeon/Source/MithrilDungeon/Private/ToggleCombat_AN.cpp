@@ -28,7 +28,7 @@ void UToggleCombat_AN::Notify(USkeletalMeshComponent* MeshComp, UAnimSequenceBas
 						UCharacterAnimInstance* charAnim = Cast<UCharacterAnimInstance>(MeshComp->GetAnimInstance());
 						if (charAnim != nullptr)
 						{
-							FName selectedSocketName = combatComp->bCombatEnable ? mainWeapon->AttachSocketName : mainWeapon->handSocketName;
+							FName selectedSocketName = combatComp->bCombatEnable ? mainWeapon->handSocketName : mainWeapon->AttachSocketName;
 
 							mainWeapon->AttachActor(selectedSocketName);
 

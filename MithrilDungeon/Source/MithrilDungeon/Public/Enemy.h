@@ -82,6 +82,12 @@ public:
 	void Die();
 
 	bool bAttack = false;
+
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	TSubclassOf<class ABaseWeapon> defaultWeapon;
+
+
 private:
 	/*UPROPERTY()
 	class UEnemyAnimInstance* anim;*/
