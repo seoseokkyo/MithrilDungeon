@@ -14,6 +14,8 @@
 #include "BaseWeapon.h"
 #include "CombatComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include "inventory/inventoryWidget.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -59,6 +61,9 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 
 	characterName = TEXT("Player");
 
+
+	inventoryComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPComp"));
+	inventoryComp->SetupAttachment(RootComponent);
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -87,6 +92,9 @@ void AMithrilDungeonCharacter::BeginPlay()
 	{
 		equipment->OnEquipped();
 	}
+	
+	inventoryWidget = Cast<UinventoryWidget>(inventoryComp->GetWidget());
+	inventoryWidget->inventoryOpen();
 }
 
 //////////////////////////////////////////////////////////////////////////
