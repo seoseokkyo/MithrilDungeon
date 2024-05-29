@@ -49,6 +49,10 @@ class AMithrilDungeonCharacter : public ADungeonOrganism
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* AttackAction;
 
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ToggleCombatAction;
+	
+
 public:
 	AMithrilDungeonCharacter();
 	
@@ -61,7 +65,11 @@ protected:
 	/** Called for looking input */
 	void Look(const FInputActionValue& Value);
 
+	void CharacterJump(const FInputActionValue& Value);
+
 	void LightAttackFunction(const FInputActionValue& Value);
+
+	void ToggleCombatFunction(const FInputActionValue& Value);
 
 protected:
 	// APawn interface

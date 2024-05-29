@@ -19,6 +19,7 @@ UENUM()
 enum class ECharacterMotionState : int8
 {
 	Idle,
+	ToggleCombat,
 	Attack,
 	Defence,
 	//Hit,
@@ -57,8 +58,6 @@ private:
 
 public:
 
-	bool bToggleCombatAnimPlay;
-	bool bOnAttack;
 	bool bDead;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
@@ -81,7 +80,7 @@ public:
 
 	TArray<int32> attackDamageArray;
 
-	//virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
+	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 
 
 	FName pelvisBoneName = TEXT("Pelvis");

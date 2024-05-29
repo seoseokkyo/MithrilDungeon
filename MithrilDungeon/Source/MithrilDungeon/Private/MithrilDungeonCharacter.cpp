@@ -98,7 +98,7 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
 		
 		// Jumping
-		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &ACharacter::Jump);
+		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::CharacterJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
 
 		// Moving
@@ -108,11 +108,23 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMithrilDungeonCharacter::Look);
 
 		EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::LightAttackFunction);
+
+		EnhancedInputComponent->BindAction(ToggleCombatAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleCombatFunction);
 	}
 	else
 	{
 		UE_LOG(LogTemplateCharacter, Error, TEXT("'%s' Failed to find an Enhanced Input component! This template is built to use the Enhanced Input system. If you intend to use the legacy system, then you will need to update this C++ file."), *GetNameSafe(this));
 	}
+}
+
+void AMithrilDungeonCharacter::CharacterJump(const FInputActionValue& Value)
+{
+	if (motionState != ECharacterMotionState::Idle)
+	{
+		return;
+	}
+
+	Super::Jump();
 }
 
 void AMithrilDungeonCharacter::Move(const FInputActionValue& Value)
@@ -153,6 +165,11 @@ void AMithrilDungeonCharacter::Look(const FInputActionValue& Value)
 
 void AMithrilDungeonCharacter::LightAttackFunction(const FInputActionValue& Value)
 {
+	if (false == combatComponent->bCombatEnable)
+	{
+		return;
+	}
+
 	if (combatComponent->bAttacking)
 	{
 		combatComponent->bAttackSaved = true;
@@ -161,18 +178,61 @@ void AMithrilDungeonCharacter::LightAttackFunction(const FInputActionValue& Valu
 	{
 		AttackEvent();
 	}
+}
 
-	bOnAttack = true;
-
-	FTimerHandle GravityTimerHandle;
-	float GravityTime = 0.5f;
-
-	GetWorld()->GetTimerManager().SetTimer(GravityTimerHandle, FTimerDelegate::CreateLambda([&]()
+void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Value)
+{
+	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+	if (IsValid(mainWeaponPtr))
+	{
+		if (motionState == ECharacterMotionState::Idle)
 		{
-			// 코드 구현
-			bOnAttack = false;
+			motionState = ECharacterMotionState::ToggleCombat;
 
-			// TimerHandle 초기화
-			GetWorld()->GetTimerManager().ClearTimer(GravityTimerHandle);
-		}), GravityTime, false);
+			float animPlayTime = 0.0f;
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
+
+
+			if (combatComponent->bCombatEnable)
+			{
+				if (mainWeaponPtr->exitCombatMontage)
+				{
+					animPlayTime = PlayAnimMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
+
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+				}
+			}
+			else
+			{
+				if (mainWeaponPtr->enterCombatMontage)
+				{
+					animPlayTime = PlayAnimMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
+
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+				}
+			}
+
+			//<< SSK 이거 먹히는지 테스트는 해봐야 됨
+			FTimerHandle timerHandle;
+
+			GetWorldTimerManager().SetTimer(timerHandle, [&]()
+			{
+				motionState = ECharacterMotionState::Idle;
+
+				combatComponent->bCombatEnable ^= true;
+
+				GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+
+			}, animPlayTime, false, 1.0f);
+		}
+	}
 }

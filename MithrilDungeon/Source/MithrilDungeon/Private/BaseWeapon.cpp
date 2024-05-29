@@ -99,19 +99,14 @@ void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 
 	AActor* hitActor = lastHitStruct.GetActor();
 
-	if (Cast<ICombatInterface>(hitActor)->CanReceiveDamage())
+	auto interfaceCheck = Cast<ICombatInterface>(hitActor);
+
+	if (interfaceCheck != nullptr)
 	{
-		/*
-			 AActor* DamagedActor,
-			 float BaseDamage,
-			 FVector const& HitFromDirection,
-			 FHitResult const& HitInfo,
-			 AController* EventInstigator,
-			 AActor* DamageCauser,
-			 TSubclassOf<UDamageType> DamageTypeClass
-		*/
+		interfaceCheck->CanReceiveDamage_Implementation();
 
 		FVector hitFromDirection = GetOwner()->GetActorForwardVector();
+
 		TSubclassOf<UDamageType> damageTypeClass = {};
 
 		//<< 이거 damageTypeClass랑 블루프린트의 기본값이랑 차이가 있는지 확인필요

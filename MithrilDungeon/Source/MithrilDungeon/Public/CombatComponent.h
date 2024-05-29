@@ -28,10 +28,19 @@ public:
 public:
 
 	// Variables
+	UPROPERTY(BlueprintReadWrite)
 	ABaseWeapon*	mainWeapon;
-	bool			bCombatEnable;
+
+	UPROPERTY(BlueprintReadWrite)
+	bool			bCombatEnable = false;
+
+	UPROPERTY(BlueprintReadWrite)
 	int32			attackCount;
+
+	UPROPERTY(BlueprintReadWrite)
 	bool			bAttackSaved;
+
+	UPROPERTY(BlueprintReadWrite)
 	bool			bAttacking;
 
 	// Functions

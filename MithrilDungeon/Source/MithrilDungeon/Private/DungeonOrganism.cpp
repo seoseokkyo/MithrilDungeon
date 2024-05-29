@@ -48,41 +48,41 @@ void ADungeonOrganism::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 }
 
-//float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-//{
-//	// 맞는 방향으로 캐릭터 회전
-//	FVector dir = DamageCauser->GetActorLocation() - GetActorLocation();
-//
-//	SetActorRotation(dir.GetSafeNormal().Rotation());
-//
-//	// State반영
-//	if (stateComp != nullptr)
-//	{
-//		stateComp->AddStatePoint(HP, -DamageAmount);
-//	}
-//
-//	// 히트 애니메이션 재생
-//	if (hitReaction != nullptr)
-//	{
-//		PlayAnimMontage(hitReaction);
-//	}
-//
-//	// 디버그
-//	if (1)
-//	{
-//		if (EventInstigator != nullptr)
-//		{
-//			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("EventInstigator : %s"), *EventInstigator->GetActorNameOrLabel()));
-//		}
-//
-//		if (DamageCauser != nullptr)
-//		{
-//			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Attack By : %s"), *DamageCauser->GetActorNameOrLabel()));
-//		}
-//	}
-//
-//	return 0.0f;
-//}
+float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	// 맞는 방향으로 캐릭터 회전
+	FVector dir = DamageCauser->GetActorLocation() - GetActorLocation();
+
+	SetActorRotation(dir.GetSafeNormal().Rotation());
+
+	// State반영
+	if (stateComp != nullptr)
+	{
+		stateComp->AddStatePoint(HP, -DamageAmount);
+	}
+
+	// 히트 애니메이션 재생
+	if (hitReaction != nullptr)
+	{
+		PlayAnimMontage(hitReaction);
+	}
+
+	// 디버그
+	if (1)
+	{
+		if (EventInstigator != nullptr)
+		{
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("EventInstigator : %s"), *EventInstigator->GetActorNameOrLabel()));
+		}
+
+		if (DamageCauser != nullptr)
+		{
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Attack By : %s"), *DamageCauser->GetActorNameOrLabel()));
+		}
+	}
+
+	return 0.0f;
+}
 
 void ADungeonOrganism::ContinueAttack_Implementation()
 {
@@ -98,8 +98,8 @@ void ADungeonOrganism::ContinueAttack_Implementation()
 
 void ADungeonOrganism::ResetCombat_Implementation()
 {
-	bToggleCombatAnimPlay = false;
-	bOnAttack = false;
+	motionState = ECharacterMotionState::Idle;
+	combatComponent->attackCount = 0;
 }
 
 bool ADungeonOrganism::CanReceiveDamage_Implementation()
@@ -109,10 +109,11 @@ bool ADungeonOrganism::CanReceiveDamage_Implementation()
 
 void ADungeonOrganism::AttackEvent()
 {
-	if (motionState == ECharacterMotionState::Idle)
+	if (motionState == ECharacterMotionState::Idle || motionState == ECharacterMotionState::Attack)
 	{
 		PerformAttack(combatComponent->attackCount, false);
 	}
+	
 }
 
 void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
@@ -130,7 +131,7 @@ void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
 			int32 montagesSize = mainWeapon->attackMontages.Num();
 			int32 randIndex = FMath::RandRange(0, montagesSize - 1);
 
-			useMontage = bUseRandom ? mainWeapon->attackMontages[attackIndex] : mainWeapon->attackMontages[randIndex];
+			useMontage = bUseRandom ? mainWeapon->attackMontages[randIndex] : mainWeapon->attackMontages[attackIndex];
 
 			if (IsValid(useMontage))
 			{
@@ -139,15 +140,10 @@ void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
 
 				//mainWeapon->weaponDamage = attackDamageArray[combatComponent->attackCount];
 
+				// 여기나 다른데서 캐릭터 스탯 및 무기 데미지 등 적용
 				mainWeapon->weaponDamage = 20;
 
 				float attackAnimTime = PlayAnimMontage(useMontage);
-
-				FTimerHandle handler;
-				GetWorldTimerManager().SetTimer(handler, [&]() {
-
-				combatComponent->bAttacking = false;
-				motionState = ECharacterMotionState::Idle;
 
 				// 카운트 증가
 				combatComponent->attackCount++;
@@ -160,7 +156,13 @@ void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
 					combatComponent->attackCount = 0;
 				}
 
-				GetWorldTimerManager().ClearTimer(handler);
+				FTimerHandle handler;
+				GetWorldTimerManager().SetTimer(handler, [&]() {
+
+					combatComponent->bAttacking = false;
+					motionState = ECharacterMotionState::Idle;
+
+					GetWorldTimerManager().ClearTimer(handler);
 
 				}, 1.0f, false, attackAnimTime);
 			}
