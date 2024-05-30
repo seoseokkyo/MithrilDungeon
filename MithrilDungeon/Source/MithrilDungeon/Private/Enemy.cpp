@@ -21,17 +21,17 @@ AEnemy::AEnemy()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 무기
-	swordComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordComp"));
-	swordComp->SetupAttachment(GetMesh(), TEXT("b_RightHandSocket"));
-	swordComp->SetRelativeLocation(FVector(11.577815, -3.876722, 5.406297));
-	swordComp->SetRelativeRotation(FRotator(36.225576, 100.412465, -48.868406));
+	//// 무기
+	//swordComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordComp"));
+	//swordComp->SetupAttachment(GetMesh(), TEXT("b_RightHandSocket"));
+	//swordComp->SetRelativeLocation(FVector(11.577815, -3.876722, 5.406297));
+	//swordComp->SetRelativeRotation(FRotator(36.225576, 100.412465, -48.868406));
 
-	// 무기날, 오버랩되면 데미지
-	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
-	boxComp->SetupAttachment(swordComp);
-	boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
-	boxComp->SetRelativeScale3D(FVector(0.1,0.1,2.2));
+	//// 무기날, 오버랩되면 데미지
+	//boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
+	//boxComp->SetupAttachment(swordComp);
+	//boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
+	//boxComp->SetRelativeScale3D(FVector(0.1,0.1,2.2));
 
 	characterName = TEXT("Skeleton");
 }

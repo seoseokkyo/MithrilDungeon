@@ -1,0 +1,20 @@
+[
+	{
+		"Name": "1",
+		"itemImagePath": "Content/MithrilDungeon/Textures/1.png",
+		"itemType": "Expendable",
+		"numberOfItemsOwned": 0
+	},
+	{
+		"Name": "2",
+		"itemImagePath": "Content/MithrilDungeon/Textures/2.png",
+		"itemType": "Expendable",
+		"numberOfItemsOwned": 0
+	},
+	{
+		"Name": "3",
+		"itemImagePath": "Content/MithrilDungeon/Textures/3.png",
+		"itemType": "Equipmentable",
+		"numberOfItemsOwned": 0
+	}
+]

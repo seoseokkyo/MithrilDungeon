@@ -16,10 +16,8 @@ UCollisionComponent::UCollisionComponent()
 	this->drawDebugType = EDrawDebugTrace::Persistent;
 
 	collisionObjectTypes.Reset();
-	collisionObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery3);
-
-
-	// ...
+	collisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
+	collisionObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery1);
 }
 
 
@@ -63,22 +61,6 @@ void UCollisionComponent::ClearHitActor()
 
 void UCollisionComponent::CollisionTrace()
 {
-	/*
-		const UObject* WorldContextObject,
-		const FVector Start,
-		const FVector End,
-		float Radius,
-		const TArray<TEnumAsByte<EObjectTypeQuery> > & ObjectTypes,
-		bool bTraceComplex,
-		const TArray<AActor*>& ActorsToIgnore,
-		EDrawDebugTrace::Type DrawDebugType,
-		TArray<FHitResult>& OutHits,
-		bool bIgnoreSelf,
-		FLinearColor TraceColor,
-		FLinearColor TraceHitColor,
-		float DrawTime
-	*/
-
 	FVector startSocketLocation = collisionMeshComponent->GetSocketLocation(startSocketName);
 	FVector endSocketLocation = collisionMeshComponent->GetSocketLocation(endSocketName);
 

@@ -17,11 +17,19 @@ UCLASS()
 class MITHRILDUNGEON_API UMithrilDungeonGameInstance : public UGameInstance
 {
 	GENERATED_BODY()
-	
-	UPROPERTY(EditAnywhere, Category="MySettings")
-	UDataTable* dt_characerStatDataTable;
+
 
 public:
 	UFUNCTION(BlueprintCallable)
 	FCharacterStat GetCharacterDataTable(const FString& rowName);
+
+	UFUNCTION(BlueprintCallable)
+	FParentItemInfo GetParentItemDataTable(const FString& rowName);
+
+		
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MySettings")
+	UDataTable* dt_characerStatDataTable;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category="MySettings")
+	UDataTable* dt_parentItemDataTable;
 };

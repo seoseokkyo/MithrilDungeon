@@ -40,7 +40,7 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 500.f;
+	GetCharacterMovement()->MaxWalkSpeed = 100.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -53,8 +53,10 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
+	//FollowCamera->SetRelativeLocation(FVector(0, 0, 0));
+	//FollowCamera->SetupAttachment(RootComponent);
 	FollowCamera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName); // Attach the camera to the end of the boom and let the boom adjust to match the controller orientation
-	FollowCamera->bUsePawnControlRotation = false; // Camera does not rotate relative to arm
+	//FollowCamera->bUsePawnControlRotation = true; // Camera does not rotate relative to arm
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
@@ -205,8 +207,9 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
 
+			combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
 
-			if (combatComponent->bCombatEnable)
+			if (!combatComponent->bCombatEnable)
 			{
 				if (mainWeaponPtr->exitCombatMontage)
 				{
@@ -240,9 +243,9 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 			{
 				motionState = ECharacterMotionState::Idle;
 
-				combatComponent->bCombatEnable ^= true;
-
 				GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
 
 			}, animPlayTime, false, 1.0f);
 		}

@@ -36,11 +36,11 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	EEnemyState enemyState = EEnemyState::IDLE;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
-	class UStaticMeshComponent* swordComp;
+	//UPROPERTY(EditAnywhere, Category = "MySettings")
+	//class UStaticMeshComponent* swordComp;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
-	class UBoxComponent* boxComp;
+	//UPROPERTY(EditAnywhere, Category = "MySettings")
+	//class UBoxComponent* boxComp;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float traceSpeed = 750.0f;
