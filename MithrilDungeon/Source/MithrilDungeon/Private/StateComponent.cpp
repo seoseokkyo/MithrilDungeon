@@ -4,6 +4,7 @@
 #include "StateComponent.h"
 #include "DungeonOrganism.h"
 #include "MithrilDungeonGameInstance.h"
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 
 // Sets default values for this component's properties
 UStateComponent::UStateComponent()
@@ -14,7 +15,7 @@ UStateComponent::UStateComponent()
 
 	// ...
 
-	character = GetOwner<ADungeonOrganism>();
+	SetIsReplicated(true);
 }
 
 
@@ -23,6 +24,8 @@ void UStateComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+
+	character = GetOwner<ADungeonOrganism>();
 	// ...
 }
 
@@ -77,18 +80,56 @@ float UStateComponent::GetStatePoint(EStateType stateType)
 
 float UStateComponent::AddStatePoint(EStateType stateType, float value)
 {
+	float temp = 0.0f;
+
 	switch (stateType)
 	{
 	case HP:
-		return currentHP += value;
+		temp = currentHP + value;
+		currentHP = temp;
+		break;
 	case SP:
-		return currentSP += value;
+		temp = currentSP + value;
+		currentSP = temp;
+		break;
 	default:
 		UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
 		break;
 	}
 
-	return 0.0f;
+	return temp;
+}
+
+void UStateComponent::ServerRPC_SetStatePoint_Implementation(EStateType stateType, float value)
+{
+	switch (stateType)
+	{
+	case HP:
+		currentHP = value;
+		break;
+	case SP:
+		currentSP = value;
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
+		break;
+	}
+}
+
+void UStateComponent::NetMulticastRPC_SetStatePoint_Implementation(EStateType stateType, float value)
+{
+	switch (stateType)
+	{
+	case HP:
+		currentHP = value;
+		break;
+	case SP:
+		currentSP = value;
+		break;
+	default:
+		UE_LOG(LogTemp, Warning, TEXT("Type Error, %s, %d"), __FILE__, __LINE__);
+		break;
+	}
 }
 
 void UStateComponent::UpdateStat()
@@ -107,5 +148,15 @@ void UStateComponent::UpdateStat()
 	// 이후 장비에 있는 스탯을 여기에 추가해줘야 함
 	MaxHP = stat.MaxHP;
 	MaxSP = stat.MaxSP;
+}
+
+void UStateComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UStateComponent, currentHP);
+	DOREPLIFETIME(UStateComponent, MaxHP);
+	DOREPLIFETIME(UStateComponent, currentSP);
+	DOREPLIFETIME(UStateComponent, MaxSP);
 }
 

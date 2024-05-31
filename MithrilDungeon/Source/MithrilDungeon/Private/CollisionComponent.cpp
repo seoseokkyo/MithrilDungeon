@@ -13,7 +13,7 @@ UCollisionComponent::UCollisionComponent()
 	this->startSocketName = FName("Weapon Start");
 	this->endSocketName = FName("Weapon End");
 	this->traceRadius = 20;
-	this->drawDebugType = EDrawDebugTrace::Persistent;
+	this->drawDebugType = EDrawDebugTrace::ForDuration;
 
 	collisionObjectTypes.Reset();
 	collisionObjectTypes.Add(UEngineTypes::ConvertToObjectType(ECollisionChannel::ECC_Pawn));
@@ -66,7 +66,7 @@ void UCollisionComponent::CollisionTrace()
 
 	TArray<FHitResult> arrayHits;
 
-	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), startSocketLocation, endSocketLocation, traceRadius, collisionObjectTypes, false, actorsToIgnore, drawDebugType, arrayHits, true, FLinearColor::Red, FLinearColor::Green);
+	UKismetSystemLibrary::SphereTraceMultiForObjects(GetWorld(), startSocketLocation, endSocketLocation, traceRadius, collisionObjectTypes, false, actorsToIgnore, drawDebugType, arrayHits, true, FLinearColor::Red, FLinearColor::Green, 1.0f);
 
 	for (const FHitResult& elem : arrayHits)
 	{

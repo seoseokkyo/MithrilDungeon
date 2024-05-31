@@ -99,4 +99,6 @@ private:
 
 	UPROPERTY()
 	class AActor* target;
+
+	void PrintInfo();
 };

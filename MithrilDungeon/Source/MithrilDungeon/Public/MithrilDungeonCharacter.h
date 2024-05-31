@@ -15,6 +15,16 @@ class UInputAction;
 struct FInputActionValue;
 class UCombatComponent;
 
+UENUM()
+enum class MyEnum : int8
+{
+	NM_Standalone,
+	NM_DedicatedServer,
+	NM_ListenServer,
+	NM_Client,
+	NM_MAX,
+};
+
 DECLARE_LOG_CATEGORY_EXTERN(LogTemplateCharacter, Log, All);
 
 UCLASS(config=Game)
@@ -55,6 +65,8 @@ class AMithrilDungeonCharacter : public ADungeonOrganism
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InventoryAction;
 
+	float animPlayTime = 0.0f;
+
 public:
 	AMithrilDungeonCharacter();
 
@@ -82,6 +94,10 @@ protected:
 	void InventoryOnOff(const FInputActionValue& Value);
 	bool bInventorystate = false;
 
+	void Tick(float DeltaTime);
+
+	void PrintInfo();
+
 protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
@@ -98,5 +114,13 @@ public:
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
+
+
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_PlayAnimationMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_PlayAnimationMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None);
 };
 

@@ -16,6 +16,8 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "inventory/inventoryWidget.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
+#include "StateComponent.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Engine/EngineBaseTypes.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -40,7 +42,7 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	// instead of recompiling to adjust them
 	GetCharacterMovement()->JumpZVelocity = 700.f;
 	GetCharacterMovement()->AirControl = 0.35f;
-	GetCharacterMovement()->MaxWalkSpeed = 100.f;
+	GetCharacterMovement()->MaxWalkSpeed = 500.f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.f;
 	GetCharacterMovement()->BrakingDecelerationFalling = 1500.0f;
@@ -102,6 +104,18 @@ void AMithrilDungeonCharacter::BeginPlay()
 		inventoryWidget->inventoryOpen();
 		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
 	}	
+}
+
+void AMithrilDungeonCharacter::ServerRPC_PlayAnimationMontage_Implementation(class UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
+{	
+	animPlayTime = PlayAnimMontage(AnimMontage, InPlayRate, StartSectionName);
+
+	NetMulticastRPC_PlayAnimationMontage(AnimMontage, InPlayRate, StartSectionName);
+}
+
+void AMithrilDungeonCharacter::NetMulticastRPC_PlayAnimationMontage_Implementation(class UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
+{
+	animPlayTime = PlayAnimMontage(AnimMontage, InPlayRate, StartSectionName);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -207,8 +221,6 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 		{
 			motionState = ECharacterMotionState::ToggleCombat;
 
-			float animPlayTime = 0.0f;
-
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
 
 			combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
@@ -217,7 +229,7 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 			{
 				if (mainWeaponPtr->exitCombatMontage)
 				{
-					animPlayTime = PlayAnimMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
+					ServerRPC_PlayAnimationMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
 
 					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
 				}
@@ -230,7 +242,7 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 			{
 				if (mainWeaponPtr->enterCombatMontage)
 				{
-					animPlayTime = PlayAnimMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
+					ServerRPC_PlayAnimationMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
 
 					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
 				}
@@ -278,4 +290,38 @@ void AMithrilDungeonCharacter::InventoryOnOff(const FInputActionValue& Value)
 		}
 	}
 
+}
+
+void AMithrilDungeonCharacter::Tick(float DeltaTime)
+{
+	Super::Tick(DeltaTime);
+
+	PrintInfo();
+}
+
+void AMithrilDungeonCharacter::PrintInfo()
+{
+	// localRole
+	FString localRole = UEnum::GetValueAsString(GetLocalRole());
+
+	// remoteRole
+	FString remoteRole = UEnum::GetValueAsString(GetRemoteRole());
+
+	// owner
+	FString owner = GetOwner() ? GetOwner()->GetName() : "";
+
+	// netConn
+	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
+
+	FString netMode = UEnum::GetValueAsString((MyEnum)GetNetMode());
+
+	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
+
+	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
+	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, *netMode, *hasController, *strHP, *strSP);
+
+	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }

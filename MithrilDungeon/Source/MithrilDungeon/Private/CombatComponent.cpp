@@ -5,6 +5,7 @@
 #include "BaseWeapon.h"
 #include <GameFramework/Character.h>
 #include "AnimInstance_Interface.h"
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -14,6 +15,7 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
+	SetIsReplicated(true);
 }
 
 
@@ -88,5 +90,16 @@ void UCombatComponent::ResetAttack()
 	attackCount = 0;
 	bAttackSaved = false;
 	bAttacking = false;
+}
+
+
+void UCombatComponent::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(UCombatComponent, bCombatEnable);
+	DOREPLIFETIME(UCombatComponent, attackCount);
+	DOREPLIFETIME(UCombatComponent, bAttackSaved);
+	DOREPLIFETIME(UCombatComponent, bAttacking);
 }
 

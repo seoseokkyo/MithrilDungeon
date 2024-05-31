@@ -9,6 +9,7 @@
 #include "CombatComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 
 // Sets default values
 ADungeonOrganism::ADungeonOrganism()
@@ -55,11 +56,22 @@ float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 	//
 	//SetActorRotation(dir.GetSafeNormal().Rotation());
 
-	// State반영
-	if (stateComp != nullptr)
-	{
-		stateComp->AddStatePoint(HP, -DamageAmount);
-	}
+	//if (HasAuthority())
+	//{
+	//	NetMulticastRPC_AmountDamage(DamageAmount);
+	//}
+	//else
+	//{
+	//	ServerRPC_AmountDamage(DamageAmount);
+	//}
+
+
+	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
+
+	//if (!HasAuthority())
+	//{
+	//	NetMulticastRPC_AmountDamage(-DamageAmount);
+	//}
 
 	//// 히트 애니메이션 재생
 	//if (hitReaction != nullptr)
@@ -111,9 +123,9 @@ void ADungeonOrganism::AttackEvent()
 {
 	if (motionState == ECharacterMotionState::Idle || motionState == ECharacterMotionState::Attack)
 	{
-		PerformAttack(combatComponent->attackCount, false);
-	}
-	
+		//PerformAttack(combatComponent->attackCount, false);
+		NetMulticastRPC_PerformAttack(combatComponent->attackCount, false);
+	}	
 }
 
 void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
@@ -219,5 +231,36 @@ void ADungeonOrganism::EnableRagdoll()
 	else
 	{
 		UE_LOG(LogTemp, Warning, TEXT("AEromCharacter : %d"), __LINE__);
+	}
+}
+
+void ADungeonOrganism::NetMulticastRPC_PerformAttack_Implementation(int32 attackIndex, bool bUseRandom)
+{
+	ADungeonOrganism::PerformAttack(attackIndex, bUseRandom);
+}
+
+void ADungeonOrganism::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ADungeonOrganism, stateComp);
+	DOREPLIFETIME(ADungeonOrganism, combatComponent);
+	DOREPLIFETIME(ADungeonOrganism, motionState);
+	
+}
+
+void ADungeonOrganism::ServerRPC_AmountDamage_Implementation(float damage)
+{
+	if (stateComp != nullptr)
+	{
+		stateComp->AddStatePoint(HP, -damage);
+	}
+}
+
+void ADungeonOrganism::NetMulticastRPC_AmountDamage_Implementation(float damage)
+{
+	if (stateComp != nullptr)
+	{
+		stateComp->AddStatePoint(HP, -damage);
 	}
 }

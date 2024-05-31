@@ -31,16 +31,16 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	ABaseWeapon*	mainWeapon;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool			bCombatEnable = false;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	int32			attackCount;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool			bAttackSaved;
 
-	UPROPERTY(BlueprintReadWrite)
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	bool			bAttacking;
 
 	// Functions

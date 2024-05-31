@@ -63,16 +63,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	FCharacterStat stat;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	float currentHP = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	float MaxHP = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	float currentSP = 0.0f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	float MaxSP = 0.0f;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
@@ -88,9 +88,18 @@ public:
 	float GetStatePoint(EStateType stateType);
 	float AddStatePoint(EStateType stateType, float value);
 
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetStatePoint(EStateType stateType, float value);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SetStatePoint(EStateType stateType, float value);
+
 	int32 GetStrength() { return currentStrength; };
 	int32 GetAgility() { return currentAgility; };
 
 	// Set CurrentValue
 	void UpdateStat();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };

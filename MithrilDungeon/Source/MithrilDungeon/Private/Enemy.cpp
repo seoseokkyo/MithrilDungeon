@@ -100,6 +100,8 @@ void AEnemy::Tick(float DeltaTime)
 		break;
 	}
 	//UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
+
+	PrintInfo();
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -153,6 +155,33 @@ void AEnemy::Die()
 		PlayAnimMontage(death_Montage);
 		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
 	}
+}
+
+void AEnemy::PrintInfo()
+{
+	// localRole
+	FString localRole = UEnum::GetValueAsString(GetLocalRole());
+
+	// remoteRole
+	FString remoteRole = UEnum::GetValueAsString(GetRemoteRole());
+
+	// owner
+	FString owner = GetOwner() ? GetOwner()->GetName() : "";
+
+	// netConn
+	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
+
+	FString netMode = UEnum::GetValueAsString((MyEnum)GetNetMode());
+
+	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
+
+	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
+	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, *netMode, *hasController, *strHP, *strSP);
+
+	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }
 
 

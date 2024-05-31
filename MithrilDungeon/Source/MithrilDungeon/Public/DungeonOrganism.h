@@ -59,10 +59,10 @@ public:
 
 	bool bDead;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	UStateComponent* stateComp;
 	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
 	UCombatComponent* combatComponent;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
@@ -71,6 +71,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = "MySettings")
 	UAnimMontage* hitReaction;	
 
+	UPROPERTY(Replicated, BlueprintReadWrite)
 	ECharacterMotionState motionState = ECharacterMotionState::Idle;
 
 	virtual void ContinueAttack_Implementation() override;
@@ -94,4 +95,16 @@ public:
 	void EnableRagdoll();
 
 	FString GetName() {return characterName;};
+
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_PerformAttack(int32 attackIndex, bool bUseRandom);
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_AmountDamage(float damage);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_AmountDamage(float currentHP);
 };

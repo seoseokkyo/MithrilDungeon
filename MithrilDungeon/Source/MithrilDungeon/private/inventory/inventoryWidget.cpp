@@ -25,16 +25,13 @@ void UinventoryWidget::inventoryOpen()
 			sizeBox->AddChild(DropitemWidget);
 		}
 	}
-
 }
 
 FReply UinventoryWidget::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
 	 Super::NativeOnMouseButtonDown(InGeometry,InMouseEvent);
 
-
 	FEventReply reply = UWidgetBlueprintLibrary::DetectDragIfPressed(InMouseEvent, this, EKeys::LeftMouseButton);
-
 
 	return reply.NativeReply;
 }

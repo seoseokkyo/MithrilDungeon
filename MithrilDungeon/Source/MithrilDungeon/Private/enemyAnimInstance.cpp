@@ -8,7 +8,6 @@ void UenemyAnimInstance::NativeInitializeAnimation()
 	Super::NativeInitializeAnimation();
 
 	enemy = Cast<AEnemy>(GetOwningActor());
-
 }
 
 void UenemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -31,5 +30,4 @@ void UenemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	// enemy의 이동 속도와 enemy의 오른쪽방향을 Dot 해서 Horizontal에 대입하고싶다.
 	Horizontal = FVector::DotProduct(vel, enemy->GetActorRightVector());
-
 }
