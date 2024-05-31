@@ -52,6 +52,8 @@ class AMithrilDungeonCharacter : public ADungeonOrganism
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* ToggleCombatAction;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* InventoryAction;
 
 public:
 	AMithrilDungeonCharacter();
@@ -76,6 +78,9 @@ protected:
 	void LightAttackFunction(const FInputActionValue& Value);
 
 	void ToggleCombatFunction(const FInputActionValue& Value);
+
+	void InventoryOnOff(const FInputActionValue& Value);
+	bool bInventorystate = false;
 
 protected:
 	// APawn interface
