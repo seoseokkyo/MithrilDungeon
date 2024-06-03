@@ -43,7 +43,7 @@ public:
 	//class UBoxComponent* boxComp;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
-	float traceSpeed = 750.0f;
+	float traceSpeed = 450.0f;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float attackDistance = 170.0f;
@@ -55,7 +55,7 @@ public:
 	float limitDistance = 1500.0f;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
-	float returnSpeed = 1000.0f;
+	float returnSpeed = 500.0f;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	int32 EnemyMaxHP = 100.0f;
@@ -76,13 +76,25 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class UAnimMontage* HitReact_Montage;
 
+	// 상태
 	void Idle();
 	void MoveTotaget();
 	void Attack();
+	void AttackDelay();
 	void Die();
+
+	// 회전
+	float rotTime = 0;
+	FRotator rotStart;
+	FRotator rotTarget;
+	FVector targetLoc;
+	FVector loctarget;
+	FVector moveDir;   // 이동방향 잡기위한 변수
+	bool bLookTarget = false;
 
 	bool bAttack = false;
 
+	bool bOnAttackDelay = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;

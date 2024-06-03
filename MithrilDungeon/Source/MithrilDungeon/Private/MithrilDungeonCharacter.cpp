@@ -15,9 +15,12 @@
 #include "CombatComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include "inventory/inventoryWidget.h"
+#include "Interfaces/MithrilDungeonHUD.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
 #include "StateComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Engine/EngineBaseTypes.h>
+#include "DrawDebugHelpers.h" // 디버그라인
+#include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -68,6 +71,11 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 
 	inventoryComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPComp"));
 	inventoryComp->SetupAttachment(RootComponent);
+
+	InteractionCheckFrequecy = 0.1; // 빈도확인
+	InteractionCheckDistance = 225.0f;  
+
+	BaseEyeHeight = 74.0f; // 플레이어 눈 높이위로
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -103,7 +111,9 @@ void AMithrilDungeonCharacter::BeginPlay()
 	{
 		inventoryWidget->inventoryOpen();
 		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-	}	
+	}
+
+	HUD = Cast<AMithrilDungeonHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
 
 void AMithrilDungeonCharacter::ServerRPC_ToggleCombat_Implementation()
@@ -162,6 +172,139 @@ void AMithrilDungeonCharacter::NetMulticastRPC_ToggleCombat_Implementation()
 		}, animPlayTime, false, 1.0f);
 }
 
+
+void AMithrilDungeonCharacter::PerformInteractionCheck()
+{
+	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
+
+	FVector TraceStart {GetPawnViewLocation()}; // 명시적 초기화, 대괄호
+	FVector TraceEnd {TraceStart + (GetViewRotation().Vector() * InteractionCheckDistance)}; // 마우스로 보기로 변경
+
+
+	float LookDirection = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector()); // 내적함수
+
+	if (LookDirection > 0)
+	{
+		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f,0, 2.0f);
+
+		FCollisionQueryParams QueryParams;
+		QueryParams.AddIgnoredActor(this);
+		FHitResult TraceHit; // 라인트레이스 결과 저장하는데 사용
+
+		if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+		{
+			if (TraceHit.GetActor()->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
+			{
+				if (TraceHit.GetActor() != InteractionData.CurrentInteractable)
+				{
+					FoundInteractable(TraceHit.GetActor());
+					return;
+				}
+
+				if (TraceHit.GetActor() == InteractionData.CurrentInteractable) 
+				{
+					return;
+				}
+			}
+		}
+	}
+
+	NoInteractableFound();
+}
+
+void AMithrilDungeonCharacter::FoundInteractable(AActor* NewInteractable)
+{
+	if (IsInteracting()) // 캐릭터가 상호작용하는 경우 호출하고 싶은 기능
+	{
+		 EndInteract();
+	}
+
+	if (InteractionData.CurrentInteractable)// 상호작용 데이터가 있으면 현재 상호작용 가능하다고 알림
+	{
+		TargetInteractable = InteractionData.CurrentInteractable;
+		TargetInteractable->EndFocus(); // 동일하지않은 것이 나왔을때 이전 상호작용 가능 항목을 종료하는지 확인
+	}
+
+	// 상호작용 데이터를 현재 상호작용 가능 항목으로 가져오기 
+	InteractionData.CurrentInteractable = NewInteractable;
+	TargetInteractable = NewInteractable;
+
+	HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData); // 참조로 타겟데이터 전달
+
+	TargetInteractable->BeginFocus();// 다음 대상 상호작용 가능 시작 호출
+}
+
+void AMithrilDungeonCharacter::NoInteractableFound()
+{
+	if (IsInteracting())// 확인하고 싶은것 X
+	{
+		GetWorld()->GetTimerManager().ClearTimer(TimerHandle_Interaction); // 타이머 초기화.
+	}
+
+	if (InteractionData.CurrentInteractable) // 현재 상호작용 가능 항목이 유효한 경우
+	{
+		if (IsValid(TargetInteractable.GetObject()))
+		{
+			TargetInteractable->EndFocus();
+		} 
+
+		HUD->HideInteractionWidget(); // 필요없는 위젯데이터 삭제
+
+		InteractionData.CurrentInteractable = nullptr; // 현재 상호작용대상 nullptr
+		TargetInteractable = nullptr; //대상 상호작용 가능항목 nullptr
+	}
+}
+
+void AMithrilDungeonCharacter::BeginInteract()
+{
+	// 작용 가능한 상태에 아무것도 변경안되었는지 확인
+	PerformInteractionCheck();
+
+	if (InteractionData.CurrentInteractable) // 상호작용 데이터가 현재라면 프로세스로 돌아가게
+	{
+		if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
+		{
+			// 충돌이 발생하고 다시 상호작용 가능항목 유효한지 확인 후 상호작용 가능
+			TargetInteractable->BeginInteract();
+
+			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f)) // 허용오차범위 0.1f, 0.2 0.3으로하면 문손잡이 돌릴때느낌으로 약간의 텀을 줄 수 있음.
+			{
+				 Interact();
+			}
+			else
+			{
+				GetWorld()->GetTimerManager().SetTimer(TimerHandle_Interaction,
+				this, &AMithrilDungeonCharacter::Interact, TargetInteractable->InteractableData.InteractionDuration/*타겟 상호작용 가능*/,false);
+			}
+		}
+	}
+}
+
+// 우리가 상호작용 하고있는지 확인필요 x
+void AMithrilDungeonCharacter::EndInteract()
+{
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_Interaction); // 타이머 초기화.
+
+	if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
+	{
+		TargetInteractable->EndInteract();// 이제 대상 상호작용 가능, 대상 상호작용 종료
+	}
+
+}
+
+
+void AMithrilDungeonCharacter::Interact()
+{
+	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_Interaction); // 타이머 초기화.
+
+	if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
+	{
+		TargetInteractable->Interact(this);// 이제 대상 상호작용 가능, 대상 상호작용 종료
+	}
+
+}
+
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -186,6 +329,11 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 
 		// 인벤토리 열고닫기
 		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);
+
+		// 물체 상호작용
+		EnhancedInputComponent->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::BeginInteract);
+
+		EnhancedInputComponent->BindAction(IA_Released, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::EndInteract);
 	}
 	else
 	{
@@ -297,6 +445,13 @@ void AMithrilDungeonCharacter::InventoryOnOff(const FInputActionValue& Value)
 void AMithrilDungeonCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	
+	if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequecy)
+	{
+		PerformInteractionCheck();
+	}
+
 
 	PrintInfo();
 }

@@ -94,6 +94,9 @@ public:
 
 	// АјАн
 	bool bAttack = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	TSubclassOf<class ABaseWeapon> defaultWeapon;
 	
 private:
 	/*UPROPERTY()

@@ -96,7 +96,6 @@ void ABoss::Tick(float DeltaTime)
 		else
 		{
 			rotTime = 0;
-			targetLoc = GetActorLocation() + GetActorForwardVector() * 1500;
 			bLookTarget = false;
 		}
 	}
