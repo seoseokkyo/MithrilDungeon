@@ -18,7 +18,7 @@ void UInteractionWidget::NativeConstruct()
 {
 	Super::NativeConstruct();
 
-	KeyPressText->SetText(FText::FromString("FPress"));
+	KeyPressText->SetText(FText::FromString("Press"));
 	CurrentInteractionDuration = 0.0f; //현재 상호작용 시간
 }
 
