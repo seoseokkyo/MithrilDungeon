@@ -37,6 +37,8 @@ struct FCharacterStat : public FTableRowBase
 
 class UDataTable;
 
+DECLARE_DYNAMIC_DELEGATE(FCharacterHPZero);
+
 UCLASS(ClassGroup = (Custom), meta = (BlueprintSpawnableComponent))
 class MITHRILDUNGEON_API UStateComponent : public UActorComponent
 {
@@ -102,4 +104,7 @@ public:
 	void UpdateStat();
 
 	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UPROPERTY(BlueprintReadWrite, Category = "MySettings")
+	FCharacterHPZero dieDelegate;
 };

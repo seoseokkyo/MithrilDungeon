@@ -87,6 +87,15 @@ float UStateComponent::AddStatePoint(EStateType stateType, float value)
 	case HP:
 		temp = currentHP + value;
 		currentHP = temp;
+
+		if (currentHP <= 0)
+		{
+			if (dieDelegate.IsBound())
+			{
+				dieDelegate.Execute();
+			}
+		}
+
 		break;
 	case SP:
 		temp = currentSP + value;

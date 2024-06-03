@@ -57,6 +57,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FString characterName;
 
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	bool bDead;
 
 	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "MySettings")
@@ -107,4 +108,7 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_AmountDamage(float currentHP);
+
+	UFUNCTION()
+	virtual void DieFunction();
 };

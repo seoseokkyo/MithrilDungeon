@@ -16,6 +16,7 @@
 #include "BaseWeapon.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 
 
 // Sets default values
@@ -53,7 +54,7 @@ void AEnemy::BeginPlay()
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
 	enemyState = EEnemyState::IDLE;
-	
+
 	if (characterName == TEXT("Skeleton"))
 	{
 		FActorSpawnParameters spawnParam;
@@ -96,7 +97,10 @@ void AEnemy::Tick(float DeltaTime)
 
 		break;
 	case EEnemyState::DIE:
-		Die();
+		if (bDead == false)
+		{
+			Die();
+		}
 		break;
 	default:
 		break;
@@ -132,17 +136,17 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AEnemy::Idle()
 {
 	SearchPlayer();
-	
+
 
 }
 
 void AEnemy::MoveTotaget()
 {
-	 targetLoc = Player->GetActorLocation();
+	targetLoc = Player->GetActorLocation();
 	if (aiCon != nullptr)
 	{
-		if (FVector::Distance(GetActorLocation(), targetLoc) < limitDistance && FVector::Distance(GetActorLocation(),targetLoc) > attackDistance)
-		{ 
+		if (FVector::Distance(GetActorLocation(), targetLoc) < limitDistance && FVector::Distance(GetActorLocation(), targetLoc) > attackDistance)
+		{
 			UE_LOG(LogTemp, Warning, TEXT("move!!"));
 			aiCon->MoveToActor(Player);
 		}
@@ -173,16 +177,19 @@ void AEnemy::Attack()
 	{
 		PlayAnimMontage(attack_Montage);
 		UE_LOG(LogTemp, Warning, TEXT("AttackAM!!"))
-		enemyState = EEnemyState::ATTACKDELAY;
+			enemyState = EEnemyState::ATTACKDELAY;
 	}
-	
+
 }
 
 void AEnemy::AttackDelay()
 {
 	if (bOnAttackDelay == false)
 	{
-		aiCon->StopMovement();
+		if (aiCon != nullptr)
+		{
+			aiCon->StopMovement();
+		}
 
 		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("AttackDelay Call"));
 
@@ -200,6 +207,37 @@ void AEnemy::AttackDelay()
 	}
 }
 
+void AEnemy::DieFunction()
+{
+	Super::DieFunction();
+
+	ServerRPC_DieFunction();
+}
+
+void AEnemy::ServerRPC_DieFunction_Implementation()
+{
+	enemyState = EEnemyState::DIE;
+
+	NetMulticastRPC_DieFunction();
+}
+
+void AEnemy::NetMulticastRPC_DieFunction_Implementation()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	if (AnimInstance)
+	{
+		float animTime = PlayAnimMontage(death_Montage);
+		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
+
+		FTimerHandle hnd;
+		GetWorldTimerManager().SetTimer(hnd, [&](){
+
+			EnableRagdoll();
+
+		}, animTime - 0.1f, false);
+	}
+}
+
 void AEnemy::Die()
 {
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
@@ -208,6 +246,13 @@ void AEnemy::Die()
 		PlayAnimMontage(death_Montage);
 		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
 	}
+}
+
+void AEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(AEnemy, enemyState);
 }
 
 void AEnemy::PrintInfo()
@@ -231,7 +276,9 @@ void AEnemy::PrintInfo()
 	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
 	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
 
-	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s"), *localRole, *remoteRole, *owner, *netConn, *netMode, *hasController, *strHP, *strSP);
+	FString strState = UEnum::GetValueAsString(enemyState);
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s\n strState : %s"), *localRole, *remoteRole, *owner, *netConn, *netMode, *hasController, *strHP, *strSP, *strState);
 
 	FVector loc = GetActorLocation() + FVector(0, 0, 50);
 	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
@@ -241,7 +288,7 @@ void AEnemy::PrintInfo()
 
 void AEnemy::OnDamaged(int32 dmg)
 {
-	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP -dmg, 0,100);
+	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP - dmg, 0, 100);
 	if (EnemyCurrentHP <= 0)
 	{
 		enemyState = EEnemyState::DIE;
@@ -272,7 +319,7 @@ void AEnemy::SearchPlayer()
 		enemyState = EEnemyState::IDLE;
 	}
 	else
-	{ 
+	{
 		enemyState = EEnemyState::MOVE;
 	}
 }

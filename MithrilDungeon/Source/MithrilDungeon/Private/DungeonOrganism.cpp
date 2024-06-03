@@ -33,6 +33,8 @@ void ADungeonOrganism::BeginPlay()
 
 	stateComp->InitStat();
 	stateComp->UpdateStat();
+	stateComp->dieDelegate.BindUFunction(this, FName("DieFunction"));
+
 }
 
 // Called every frame
@@ -51,33 +53,7 @@ void ADungeonOrganism::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
 {
-	//// 맞는 방향으로 캐릭터 회전
-	//FVector dir = DamageCauser->GetActorLocation() - GetActorLocation();
-	//
-	//SetActorRotation(dir.GetSafeNormal().Rotation());
-
-	//if (HasAuthority())
-	//{
-	//	NetMulticastRPC_AmountDamage(DamageAmount);
-	//}
-	//else
-	//{
-	//	ServerRPC_AmountDamage(DamageAmount);
-	//}
-
-
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
-
-	//if (!HasAuthority())
-	//{
-	//	NetMulticastRPC_AmountDamage(-DamageAmount);
-	//}
-
-	//// 히트 애니메이션 재생
-	//if (hitReaction != nullptr)
-	//{
-	//	PlayAnimMontage(hitReaction);
-	//}
 
 	// 디버그
 	if (1)
@@ -211,6 +187,7 @@ void ADungeonOrganism::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ADungeonOrganism, stateComp);
 	DOREPLIFETIME(ADungeonOrganism, combatComponent);
 	DOREPLIFETIME(ADungeonOrganism, motionState);
+	DOREPLIFETIME(ADungeonOrganism, bDead);
 	
 }
 
@@ -268,4 +245,12 @@ void ADungeonOrganism::NetMulticastRPC_AmountDamage_Implementation(float damage)
 	{
 		stateComp->AddStatePoint(HP, -damage);
 	}
+}
+
+void ADungeonOrganism::DieFunction()
+{
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Dead : %s"), *GetActorNameOrLabel()));
+
+	bDead = true;
+
 }

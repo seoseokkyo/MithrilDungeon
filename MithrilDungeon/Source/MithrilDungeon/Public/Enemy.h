@@ -33,7 +33,7 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, Category = "MySettings")
 	EEnemyState enemyState = EEnemyState::IDLE;
 
 	//UPROPERTY(EditAnywhere, Category = "MySettings")
@@ -83,6 +83,8 @@ public:
 	void AttackDelay();
 	void Die();
 
+	virtual void DieFunction() override;
+
 	// È¸Àü
 	float rotTime = 0;
 	FRotator rotStart;
@@ -99,6 +101,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
 
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_DieFunction();
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_DieFunction();
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 
 private:
 	/*UPROPERTY()
