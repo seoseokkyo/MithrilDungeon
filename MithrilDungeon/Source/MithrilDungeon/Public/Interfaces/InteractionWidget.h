@@ -23,7 +23,7 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = "Interaction Widget | Player Reference")
 	AMithrilDungeonCharacter* PlayerReference;
 
-	void UpdateWidget(const FInteractableData* InteractableData)const; // 모든 다른 텍스트블록 업데이트
+	void UpdateWidget(const FInteractableData& InteractableData)const; // 모든 다른 텍스트블록 업데이트
 
 protected:
 	UPROPERTY(VisibleAnywhere, meta = (BindWidget), Category = "Interaction Widget | Interactable Data")

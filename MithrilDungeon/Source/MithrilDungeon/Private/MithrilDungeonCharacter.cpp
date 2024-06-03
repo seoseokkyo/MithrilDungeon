@@ -109,6 +109,8 @@ void AMithrilDungeonCharacter::BeginPlay()
 
 	if (inventoryWidget != nullptr)
 	{
+		inventoryComp->SetWidget(nullptr);
+		inventoryWidget->AddToViewport();
 		inventoryWidget->inventoryOpen();
 		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
 	}
@@ -229,7 +231,7 @@ void AMithrilDungeonCharacter::FoundInteractable(AActor* NewInteractable)
 	InteractionData.CurrentInteractable = NewInteractable;
 	TargetInteractable = NewInteractable;
 
-	HUD->UpdateInteractionWidget(&TargetInteractable->InteractableData); // 참조로 타겟데이터 전달
+	HUD->UpdateInteractionWidget(TargetInteractable->InteractableData); // 참조로 타겟데이터 전달
 
 	TargetInteractable->BeginFocus();// 다음 대상 상호작용 가능 시작 호출
 }

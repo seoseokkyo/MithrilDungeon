@@ -20,7 +20,7 @@ void AMithrilDungeonHUD::BeginPlay()
 		MainManuWidget->SetVisibility(ESlateVisibility::Collapsed); // 축소설정,Hide와 비슷
 	}
 
-	if (InteractionWidget)
+	if (InteractionWidgetClass)
 	{
 		InteractionWidget = CreateWidget<UInteractionWidget>(GetWorld(), InteractionWidgetClass);
 		InteractionWidget->AddToViewport(-1);
@@ -63,7 +63,7 @@ void AMithrilDungeonHUD::HideInteractionWidget()const
 	}
 }
 
-void AMithrilDungeonHUD::UpdateInteractionWidget(const FInteractableData* InteractableData)const
+void AMithrilDungeonHUD::UpdateInteractionWidget(const FInteractableData& InteractableData)const
 {
 	if (InteractionWidget)
 	{

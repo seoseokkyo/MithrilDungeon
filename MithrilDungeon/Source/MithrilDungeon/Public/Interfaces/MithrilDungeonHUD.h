@@ -33,7 +33,7 @@ public:
 
 	//================================================================================
 	// FUNCTIONS
-	
+	//================================================================================
 	AMithrilDungeonHUD();
 
 
@@ -42,9 +42,9 @@ public:
 
 	void ShowInteractionWidget()const;
 	void HideInteractionWidget()const;
-	void UpdateInteractionWidget(const FInteractableData* InteractableData)const; // 상호작용가능데이터
+	void UpdateInteractionWidget(const FInteractableData& InteractableData)const; // 상호작용가능데이터
 
-	//================================================================================
+	
 	
 
 protected:
