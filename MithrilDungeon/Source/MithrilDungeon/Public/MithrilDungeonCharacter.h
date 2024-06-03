@@ -65,8 +65,6 @@ class AMithrilDungeonCharacter : public ADungeonOrganism
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
 	UInputAction* InventoryAction;
 
-	float animPlayTime = 0.0f;
-
 public:
 	AMithrilDungeonCharacter();
 
@@ -115,12 +113,10 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-
-
 	UFUNCTION(Server, Reliable)
-	void ServerRPC_PlayAnimationMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None);
+	void ServerRPC_ToggleCombat();
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastRPC_PlayAnimationMontage(class UAnimMontage* AnimMontage, float InPlayRate = 1.f, FName StartSectionName = NAME_None);
+	void NetMulticastRPC_ToggleCombat();
 };
 

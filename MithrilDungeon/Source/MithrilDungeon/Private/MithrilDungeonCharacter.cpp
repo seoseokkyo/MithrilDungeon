@@ -106,16 +106,60 @@ void AMithrilDungeonCharacter::BeginPlay()
 	}	
 }
 
-void AMithrilDungeonCharacter::ServerRPC_PlayAnimationMontage_Implementation(class UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
-{	
-	animPlayTime = PlayAnimMontage(AnimMontage, InPlayRate, StartSectionName);
+void AMithrilDungeonCharacter::ServerRPC_ToggleCombat_Implementation()
+{
+	motionState = ECharacterMotionState::ToggleCombat;
 
-	NetMulticastRPC_PlayAnimationMontage(AnimMontage, InPlayRate, StartSectionName);
+	combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
+
+	NetMulticastRPC_ToggleCombat();
 }
 
-void AMithrilDungeonCharacter::NetMulticastRPC_PlayAnimationMontage_Implementation(class UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
+void AMithrilDungeonCharacter::NetMulticastRPC_ToggleCombat_Implementation()
 {
-	animPlayTime = PlayAnimMontage(AnimMontage, InPlayRate, StartSectionName);
+	auto mainWeaponPtr = combatComponent->GetMainWeapon();
+
+	float animPlayTime = 0.0f;
+
+	if (!combatComponent->bCombatEnable)
+	{
+		if (mainWeaponPtr->exitCombatMontage)
+		{
+			animPlayTime = PlayAnimMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+		}
+	}
+	else
+	{
+		if (mainWeaponPtr->enterCombatMontage)
+		{
+			animPlayTime = PlayAnimMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
+		}
+	}
+
+	//<< SSK ÀÌ°Å ¸ÔÈ÷´ÂÁö Å×½ºÆ®´Â ÇØºÁ¾ß µÊ
+	FTimerHandle timerHandle;
+
+	GetWorldTimerManager().SetTimer(timerHandle, [&]()
+		{
+			motionState = ECharacterMotionState::Idle;
+
+			GetWorld()->GetTimerManager().ClearTimer(timerHandle);
+
+			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
+
+		}, animPlayTime, false, 1.0f);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -219,51 +263,9 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 	{
 		if (motionState == ECharacterMotionState::Idle)
 		{
-			motionState = ECharacterMotionState::ToggleCombat;
-
 			UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
 
-			combatComponent->bCombatEnable = !combatComponent->bCombatEnable;
-
-			if (!combatComponent->bCombatEnable)
-			{
-				if (mainWeaponPtr->exitCombatMontage)
-				{
-					ServerRPC_PlayAnimationMontage(mainWeaponPtr->exitCombatMontage, 1.5f);
-
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
-				}
-			}
-			else
-			{
-				if (mainWeaponPtr->enterCombatMontage)
-				{
-					ServerRPC_PlayAnimationMontage(mainWeaponPtr->enterCombatMontage, 1.5f);
-
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("animPlayTime : %f"), animPlayTime));
-				}
-				else
-				{
-					UE_LOG(LogTemp, Warning, TEXT("ToggleCombatFunction : %d"), __LINE__);
-				}
-			}
-
-			//<< SSK ÀÌ°Å ¸ÔÈ÷´ÂÁö Å×½ºÆ®´Â ÇØºÁ¾ß µÊ
-			FTimerHandle timerHandle;
-
-			GetWorldTimerManager().SetTimer(timerHandle, [&]()
-			{
-				motionState = ECharacterMotionState::Idle;
-
-				GetWorld()->GetTimerManager().ClearTimer(timerHandle);
-
-				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("combatComponent->bCombatEnable : %s"), combatComponent->bCombatEnable ? TEXT("TRUE") : TEXT("FALSE")));
-
-			}, animPlayTime, false, 1.0f);
+			ServerRPC_ToggleCombat();
 		}
 	}
 }

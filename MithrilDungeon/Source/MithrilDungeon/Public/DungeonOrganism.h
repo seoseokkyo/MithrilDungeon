@@ -82,9 +82,7 @@ public:
 
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 
-
 	FName pelvisBoneName = TEXT("Pelvis");
-
 
 	UFUNCTION(BlueprintCallable)
 	void AttackEvent();
@@ -96,11 +94,13 @@ public:
 
 	FString GetName() {return characterName;};
 
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_PerformAttack(UAnimMontage* useMontage);
 
 	UFUNCTION(NetMulticast, Reliable)
-	void NetMulticastRPC_PerformAttack(int32 attackIndex, bool bUseRandom);
-
-	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+	void NetMulticastRPC_PerformAttack(UAnimMontage* useMontage);
 
 	UFUNCTION(Server, Reliable)
 	void ServerRPC_AmountDamage(float damage);

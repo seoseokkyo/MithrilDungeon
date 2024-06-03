@@ -123,8 +123,7 @@ void ADungeonOrganism::AttackEvent()
 {
 	if (motionState == ECharacterMotionState::Idle || motionState == ECharacterMotionState::Attack)
 	{
-		//PerformAttack(combatComponent->attackCount, false);
-		NetMulticastRPC_PerformAttack(combatComponent->attackCount, false);
+		PerformAttack(combatComponent->attackCount, false);
 	}	
 }
 
@@ -147,36 +146,7 @@ void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
 
 			if (IsValid(useMontage))
 			{
-				combatComponent->bAttacking = true;
-				motionState = ECharacterMotionState::Attack;
-
-				//mainWeapon->weaponDamage = attackDamageArray[combatComponent->attackCount];
-
-				// 여기나 다른데서 캐릭터 스탯 및 무기 데미지 등 적용
-				mainWeapon->weaponDamage = 20;
-
-				float attackAnimTime = PlayAnimMontage(useMontage);
-
-				// 카운트 증가
-				combatComponent->attackCount++;
-
-				int32 montageLastIndex = mainWeapon->attackMontages.Num() - 1;
-
-				// 카운트 초기화
-				if (combatComponent->attackCount > montageLastIndex)
-				{
-					combatComponent->attackCount = 0;
-				}
-
-				FTimerHandle handler;
-				GetWorldTimerManager().SetTimer(handler, [&]() {
-
-					combatComponent->bAttacking = false;
-					motionState = ECharacterMotionState::Idle;
-
-					GetWorldTimerManager().ClearTimer(handler);
-
-				}, 1.0f, false, attackAnimTime);
+				ServerRPC_PerformAttack(useMontage);
 			}
 		}
 	}
@@ -234,11 +204,6 @@ void ADungeonOrganism::EnableRagdoll()
 	}
 }
 
-void ADungeonOrganism::NetMulticastRPC_PerformAttack_Implementation(int32 attackIndex, bool bUseRandom)
-{
-	ADungeonOrganism::PerformAttack(attackIndex, bUseRandom);
-}
-
 void ADungeonOrganism::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
@@ -247,6 +212,46 @@ void ADungeonOrganism::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ADungeonOrganism, combatComponent);
 	DOREPLIFETIME(ADungeonOrganism, motionState);
 	
+}
+
+void ADungeonOrganism::ServerRPC_PerformAttack_Implementation(UAnimMontage* useMontage)
+{
+	ABaseWeapon* mainWeapon = combatComponent->GetMainWeapon();
+
+	combatComponent->bAttacking = true;
+
+	motionState = ECharacterMotionState::Attack;
+
+	// 여기나 다른데서 캐릭터 스탯 및 무기 데미지 등 적용
+	mainWeapon->weaponDamage = 20;
+
+	// 카운트 증가
+	combatComponent->attackCount++;
+
+	int32 montageLastIndex = mainWeapon->attackMontages.Num() - 1;
+
+	// 카운트 초기화
+	if (combatComponent->attackCount > montageLastIndex)
+	{
+		combatComponent->attackCount = 0;
+	}
+
+	NetMulticastRPC_PerformAttack(useMontage);
+}
+
+void ADungeonOrganism::NetMulticastRPC_PerformAttack_Implementation(UAnimMontage* useMontage)
+{
+	float attackAnimTime = PlayAnimMontage(useMontage);
+
+	FTimerHandle handler;
+	GetWorldTimerManager().SetTimer(handler, [&]() {
+
+		combatComponent->bAttacking = false;
+		motionState = ECharacterMotionState::Idle;
+
+		GetWorldTimerManager().ClearTimer(handler);
+
+		}, 1.0f, false, attackAnimTime);
 }
 
 void ADungeonOrganism::ServerRPC_AmountDamage_Implementation(float damage)
