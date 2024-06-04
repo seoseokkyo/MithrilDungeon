@@ -14,20 +14,38 @@ void UCollisionTrace_ANs::NotifyBegin(USkeletalMeshComponent* MeshComp, UAnimSeq
 		AActor* owenrActor = MeshComp->GetOwner();
 		if (owenrActor != nullptr)
 		{
-			UCombatComponent* combatComp = owenrActor->GetComponentByClass<UCombatComponent>();
 
-			if (combatComp != nullptr)
+			auto comps = owenrActor->GetComponentsByTag(UCombatComponent::StaticClass(), FName(TEXT("CombatComp")));
+			for (auto Comp : comps)
 			{
-				ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
-
-				if (IsValid(mainWeapon))
+				auto combatComp = Cast<UCombatComponent>(Comp);
+				if (combatComp != nullptr)
 				{
-					if (mainWeapon->collisionComponent != nullptr)
+					ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
+
+					if (IsValid(mainWeapon))
 					{
-						mainWeapon->collisionComponent->SetEnableCollision(true);	// Enable
+						if (mainWeapon->collisionComponent != nullptr)
+						{
+							mainWeapon->collisionComponent->SetEnableCollision(true);	// Enable
+						}
 					}
 				}
 			}
+
+			//UCombatComponent* combatComp = owenrActor->GetComponentByClass<UCombatComponent>();
+			//if (combatComp != nullptr)
+			//{
+			//	ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
+			//
+			//	if (IsValid(mainWeapon))
+			//	{
+			//		if (mainWeapon->collisionComponent != nullptr)
+			//		{
+			//			mainWeapon->collisionComponent->SetEnableCollision(true);	// Enable
+			//		}
+			//	}
+			//}
 		}
 	}
 }
@@ -39,20 +57,38 @@ void UCollisionTrace_ANs::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSeque
 		AActor* owenrActor = MeshComp->GetOwner();
 		if (owenrActor != nullptr)
 		{
-			UCombatComponent* combatComp = owenrActor->GetComponentByClass<UCombatComponent>();
-
-			if (combatComp != nullptr)
+			auto comps = owenrActor->GetComponentsByTag(UCombatComponent::StaticClass(), FName(TEXT("CombatComp")));
+			for (auto Comp : comps)
 			{
-				ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
-
-				if (IsValid(mainWeapon))
+				auto combatComp = Cast<UCombatComponent>(Comp);
+				if (combatComp != nullptr)
 				{
-					if (mainWeapon->collisionComponent != nullptr)
+					ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
+
+					if (IsValid(mainWeapon))
 					{
-						mainWeapon->collisionComponent->SetEnableCollision(false);	// Disable
+						if (mainWeapon->collisionComponent != nullptr)
+						{
+							mainWeapon->collisionComponent->SetEnableCollision(false);	// Disable
+						}
 					}
 				}
 			}
+
+			//UCombatComponent* combatComp = owenrActor->GetComponentByClass<UCombatComponent>();
+
+			//if (combatComp != nullptr)
+			//{
+			//	ABaseWeapon* mainWeapon = combatComp->GetMainWeapon();
+
+			//	if (IsValid(mainWeapon))
+			//	{
+			//		if (mainWeapon->collisionComponent != nullptr)
+			//		{
+			//			mainWeapon->collisionComponent->SetEnableCollision(false);	// Disable
+			//		}
+			//	}
+			//}
 		}
 	}
 }

@@ -93,6 +93,62 @@ void ABaseWeapon::OnEquipped()
 	}
 }
 
+void ABaseWeapon::OnEquippedTarget(UCombatComponent* combatcomp)
+{
+	if (GetOwner() != nullptr)
+	{
+		if (combatcomp != nullptr)
+		{
+			FName selectedName = (combatcomp->bCombatEnable ? handSocketName : AttachSocketName);
+
+			AttachActor(selectedName);
+
+			combatcomp->SetMainWeapon(this);
+
+			ACharacter* characterPtr = Cast<ACharacter>(GetOwner());
+			if (characterPtr)
+			{
+				USkeletalMeshComponent* skeletalMeshComponent = characterPtr->GetMesh();
+				if (skeletalMeshComponent)
+				{
+					UAnimInstance* animInstance = skeletalMeshComponent->GetAnimInstance();
+
+					if (animInstance != nullptr)
+					{
+						IAnimInstance_Interface* AnimInterface = Cast<IAnimInstance_Interface>(animInstance);
+
+						if (AnimInterface != nullptr)
+						{
+							AnimInterface->UpdateCombatType_Implementation(eWeaponType);
+
+							UE_LOG(LogTemp, Warning, TEXT("%s Send UUpdateCombatType"), *animInstance->GetName());
+						}
+						else
+						{
+							UE_LOG(LogTemp, Warning, TEXT("%s Is do not Have IAnimInstance_Interface"), *skeletalMeshComponent->GetName());
+						}
+					}
+				}
+				else
+				{
+					UE_LOG(LogTemp, Warning, TEXT("skeletalMeshComponent Is Nullptr"));
+				}
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Owner Is Not Character"));
+			}
+
+			collisionComponent->SetCollisionMesh(GetItemMesh());
+			collisionComponent->AddActorToIgnore(GetOwner());
+		}
+	}
+	else
+	{
+		UE_LOG(LogTemp, Warning, TEXT("selectedName : %p"), this);
+	}
+}
+
 void ABaseWeapon::OnHitCollisionComponent(FHitResult lastHitStruct)
 {
 	UE_LOG(LogTemp, Warning, TEXT("OnHitCollisionComponent Called"));

@@ -10,6 +10,9 @@
 /**
  * 
  */
+
+ class ADungeonOrganism;
+
 UCLASS()
 class MITHRILDUNGEON_API UCharacterAnimInstance : public UAnimInstance, public IAnimInstance_Interface
 {
@@ -23,6 +26,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCombatEnable = false;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	bool bDie = false;
+
+	UPROPERTY()
+	ADungeonOrganism* myCharacter;
+
 	virtual void UpdateCombatType_Implementation(EWeaponType eType) override;
 	virtual void UpdateCombatEnabled_Implementation(bool bEnable) override;
+	virtual void NativeInitializeAnimation() override;
+	virtual void NativeUpdateAnimation(float DeltaSeconds) override;
 };

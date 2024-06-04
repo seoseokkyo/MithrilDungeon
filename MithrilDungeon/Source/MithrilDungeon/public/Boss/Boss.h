@@ -18,6 +18,7 @@ enum class EBoseState : uint8
 	DIE			
 };
 
+class UCombatComponent;
 
 UCLASS()
 class MITHRILDUNGEON_API ABoss : public ADungeonOrganism
@@ -33,14 +34,14 @@ public:
 
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
+	UPROPERTY(Replicated, EditAnywhere, Category = "MySettings")
 	EBoseState enemyState = EBoseState::IDLE;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
-	class UStaticMeshComponent* swordComp;
+	//UPROPERTY(EditAnywhere, Category = "MySettings")
+	//class UStaticMeshComponent* swordComp;
 
-	UPROPERTY(EditAnywhere, Category = "MySettings")
-	class UBoxComponent* boxComp;
+	//UPROPERTY(EditAnywhere, Category = "MySettings")
+	//class UBoxComponent* boxComp;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	float traceSpeed = 750.0f;
@@ -66,6 +67,10 @@ public:
 	void OnDamaged(int32 dmg);
 
 	void SearchPlayer();
+
+	void PrintInfo();
+
+	bool bOnAttackDelay = false;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	class UAnimMontage* attack_Montage;
@@ -97,7 +102,15 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
+
+	UPROPERTY(Replicated, EditAnywhere, BlueprintReadWrite, Category = "Components")
+	UCombatComponent* combatComponent_Additional;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
+	TSubclassOf<class ABaseWeapon> defaultWeapon_Additional;
 	
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
+
 private:
 	/*UPROPERTY()
 	class UEnemyAnimInstance* anim;*/

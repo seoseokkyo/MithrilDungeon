@@ -14,25 +14,30 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/BoxComponent.h>
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
+#include "BaseWeapon.h"
+#include "CombatComponent.h"
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 
 
 ABoss::ABoss()
 {
 	PrimaryActorTick.bCanEverTick = true;
 
-	// 무기
-	swordComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordComp"));
-	swordComp->SetupAttachment(GetMesh(), TEXT("b_RightHandSocket"));
-	swordComp->SetRelativeLocation(FVector(11.577815, -3.876722, 5.406297));
-	swordComp->SetRelativeRotation(FRotator(36.225576, 100.412465, -48.868406));
+	//// 무기
+	//swordComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("SwordComp"));
+	//swordComp->SetupAttachment(GetMesh(), TEXT("b_RightHandSocket"));
+	//swordComp->SetRelativeLocation(FVector(11.577815, -3.876722, 5.406297));
+	//swordComp->SetRelativeRotation(FRotator(36.225576, 100.412465, -48.868406));
 
-	// 무기날, 오버랩되면 데미지
-	boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
-	boxComp->SetupAttachment(swordComp);
-	boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
-	boxComp->SetRelativeScale3D(FVector(0.1, 0.1, 2.2));
+	//// 무기날, 오버랩되면 데미지
+	//boxComp = CreateDefaultSubobject<UBoxComponent>(TEXT("boxComp"));
+	//boxComp->SetupAttachment(swordComp);
+	//boxComp->SetRelativeLocation(FVector(-0.000001, 0, 82.601549));
+	//boxComp->SetRelativeScale3D(FVector(0.1, 0.1, 2.2));
 
 	characterName = TEXT("Skeleton");
+
+	combatComponent_Additional = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp_Additional"));
 }
 
 
@@ -51,11 +56,46 @@ void ABoss::BeginPlay()
 	// 기본 상태를 IDLE 상태로 초기화한다.
 	enemyState = EBoseState::IDLE;
 
+	if (characterName == TEXT("Skeleton"))
+	{
+		FActorSpawnParameters spawnParam;
+		spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+		spawnParam.TransformScaleMethod = ESpawnActorScaleMethod::MultiplyWithRoot;
+		spawnParam.Owner = this;
+		spawnParam.Instigator = this;
+
+		ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+
+		if (equipment)
+		{
+			equipment->OnEquipped();
+		}
+
+		ABaseWeapon* equipment_Additional = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon_Additional, GetActorTransform(), spawnParam);
+
+		if (equipment_Additional)
+		{
+			equipment_Additional->OnEquippedTarget(combatComponent_Additional);
+		}
+	}
+
 }
 
 void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	PrintInfo();
+
+	if (bDead)
+	{
+		if (enemyState != EBoseState::DIE)
+		{
+			enemyState = EBoseState::DIE;
+		}
+
+		return;
+	}
 
 	switch (enemyState)
 	{
@@ -111,8 +151,6 @@ void ABoss::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void ABoss::Idle()
 {
 	SearchPlayer();
-
-
 }
 
 void ABoss::MoveTotaget()
@@ -123,6 +161,7 @@ void ABoss::MoveTotaget()
 		if (FVector::Distance(GetActorLocation(), targetLoc) < limitDistance && FVector::Distance(GetActorLocation(), targetLoc) > attackDistance)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("move!!"));
+			aiCon->SetFocus(Player);
 			aiCon->MoveToActor(Player);
 		}
 		if (FVector::Distance(GetActorLocation(), targetLoc) <= attackDistance)
@@ -145,13 +184,16 @@ void ABoss::Attack()
 	/*UE_LOG(LogTemp, Warning, TEXT("Attack!!"));*/
 	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	bAttack = true;
+
+	bOnAttackDelay = false;
+
 	if (AnimInstance && bAttack)
 	{
-		PlayAnimMontage(attack_Montage);
+		AttackEvent();
+
 		UE_LOG(LogTemp, Warning, TEXT("AttackAM!!"))
 			enemyState = EBoseState::ATTACKDELAY;
 	}
-
 }
 
 void ABoss::AttackDelay()
@@ -172,6 +214,14 @@ void ABoss::Die()
 		PlayAnimMontage(death_Montage);
 		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
 	}
+}
+
+void ABoss::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
+
+	DOREPLIFETIME(ABoss, combatComponent_Additional);
+	DOREPLIFETIME(ABoss, enemyState);
 }
 
 
@@ -204,7 +254,7 @@ void ABoss::SearchPlayer()
 
 	FVector Start = GetActorLocation();
 	FVector End = Player->GetActorLocation();
-	if (FVector::Distance(Start, End) < 100)
+	if (FVector::Distance(Start, End) > 1000)
 	{
 		enemyState = EBoseState::IDLE;
 	}
@@ -212,4 +262,33 @@ void ABoss::SearchPlayer()
 	{
 		enemyState = EBoseState::MOVE;
 	}
+}
+
+void ABoss::PrintInfo()
+{
+	// localRole
+	FString localRole = UEnum::GetValueAsString(GetLocalRole());
+
+	// remoteRole
+	FString remoteRole = UEnum::GetValueAsString(GetRemoteRole());
+
+	// owner
+	FString owner = GetOwner() ? GetOwner()->GetName() : "";
+
+	// netConn
+	FString netConn = GetNetConnection() ? "Valid" : "Invalid";
+
+	FString netMode = UEnum::GetValueAsString((MyEnum)GetNetMode());
+
+	FString hasController = Controller ? TEXT("HasController") : TEXT("NoController");
+
+	FString strHP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::HP));
+	FString strSP = FString::Printf(TEXT("%f"), stateComp->GetStatePoint(EStateType::SP));
+
+	FString strState = UEnum::GetValueAsString(enemyState);
+
+	FString str = FString::Printf(TEXT("localRole : %s\nremoteRole : %s\nowner : %s\nnetConn : %s\nnetMode : %s\nhasController : %s\n HP : %s\n SP : %s\n strState : %s"), *localRole, *remoteRole, *owner, *netConn, *netMode, *hasController, *strHP, *strSP, *strState);
+
+	FVector loc = GetActorLocation() + FVector(0, 0, 50);
+	DrawDebugString(GetWorld(), loc, str, nullptr, FColor::White, 0, true);
 }

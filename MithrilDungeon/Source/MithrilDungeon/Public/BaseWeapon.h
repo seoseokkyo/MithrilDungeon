@@ -74,6 +74,8 @@ public:
 	// Functions
 	void OnEquipped();
 
+	void OnEquippedTarget(UCombatComponent* combatcomp);
+
 	UFUNCTION()
 	void OnHitCollisionComponent(FHitResult lastHitStruct);
 

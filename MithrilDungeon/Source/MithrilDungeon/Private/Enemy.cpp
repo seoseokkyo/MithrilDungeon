@@ -250,9 +250,7 @@ void AEnemy::NetMulticastRPC_DieFunction_Implementation()
 	if (AnimInstance)
 	{
 		float animTime = PlayAnimMontage(death_Montage);
-		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
-
-
+		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"));
 	}
 }
 
@@ -262,7 +260,7 @@ void AEnemy::Die()
 	if (AnimInstance)
 	{
 		PlayAnimMontage(death_Montage);
-		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
+		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"));
 	}
 }
 

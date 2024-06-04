@@ -16,6 +16,8 @@ UCombatComponent::UCombatComponent()
 
 	// ...
 	SetIsReplicated(true);
+
+	ComponentTags.Add(TEXT("CombatComp"));
 }
 
 
