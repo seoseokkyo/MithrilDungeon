@@ -21,6 +21,8 @@ void UenemyAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 
 	if (enemy == nullptr) return;
 
+	bDie = enemy->bDead;
+
 	// Me의 이동속도를 Horizontal, Vertical로 분리해서 각 각 변수에 채우고싶다.
 
 	// enemy의 이동속도를 가져오고싶다.

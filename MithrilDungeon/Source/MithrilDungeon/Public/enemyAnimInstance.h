@@ -31,6 +31,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Net)
 	float Vertical;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = Net)
+	bool bDie = false;
 	
 };
 

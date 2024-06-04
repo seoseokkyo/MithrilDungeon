@@ -50,7 +50,7 @@ void AEnemy::BeginPlay()
 		Player = *findActor;
 	}
 
-	aiCon = GetController<AAIController>();
+	aiCon = GetController<AAIController>();	
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
 	enemyState = EEnemyState::IDLE;
@@ -75,6 +75,18 @@ void AEnemy::BeginPlay()
 void AEnemy::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	PrintInfo();
+
+	if (bDead)
+	{
+		if (enemyState != EEnemyState::DIE)
+		{
+			enemyState = EEnemyState::DIE;
+		}
+
+		return;
+	}
 
 	switch (enemyState)
 	{
@@ -124,7 +136,6 @@ void AEnemy::Tick(float DeltaTime)
 
 	//UE_LOG(LogTemp, Warning, TEXT("State Transition: %s"), *StaticEnum<EEnemyState>()->GetValueAsString(enemyState));
 
-	PrintInfo();
 }
 
 void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -148,6 +159,7 @@ void AEnemy::MoveTotaget()
 		if (FVector::Distance(GetActorLocation(), targetLoc) < limitDistance && FVector::Distance(GetActorLocation(), targetLoc) > attackDistance)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("move!!"));
+			aiCon->SetFocus(Player);
 			aiCon->MoveToActor(Player);
 		}
 		if (FVector::Distance(GetActorLocation(), targetLoc) <= attackDistance)
@@ -203,12 +215,14 @@ void AEnemy::AttackDelay()
 
 			UKismetSystemLibrary::PrintString(GetWorld(), TEXT("EEnemyState::IDLE"));
 
-			}, 3, false);
+			}, 6, false);
 	}
 }
 
 void AEnemy::DieFunction()
 {
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.2);
+	
 	Super::DieFunction();
 
 	ServerRPC_DieFunction();
@@ -218,7 +232,16 @@ void AEnemy::ServerRPC_DieFunction_Implementation()
 {
 	enemyState = EEnemyState::DIE;
 
-	NetMulticastRPC_DieFunction();
+	aiCon->SetFocus(nullptr);
+
+	FTimerHandle hnd;
+	GetWorldTimerManager().SetTimer(hnd, [&]() {
+
+		EnableRagdoll();
+
+		}, 2.0f, false);
+
+	//NetMulticastRPC_DieFunction();
 }
 
 void AEnemy::NetMulticastRPC_DieFunction_Implementation()
@@ -229,12 +252,7 @@ void AEnemy::NetMulticastRPC_DieFunction_Implementation()
 		float animTime = PlayAnimMontage(death_Montage);
 		UE_LOG(LogTemp, Warning, TEXT("death_AM!!"))
 
-		FTimerHandle hnd;
-		GetWorldTimerManager().SetTimer(hnd, [&](){
 
-			EnableRagdoll();
-
-		}, animTime - 0.1f, false);
 	}
 }
 

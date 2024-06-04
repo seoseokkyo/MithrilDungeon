@@ -200,7 +200,7 @@ void ADungeonOrganism::ServerRPC_PerformAttack_Implementation(UAnimMontage* useM
 	motionState = ECharacterMotionState::Attack;
 
 	// 여기나 다른데서 캐릭터 스탯 및 무기 데미지 등 적용
-	mainWeapon->weaponDamage = 20;
+	mainWeapon->weaponDamage = mainWeapon->weaponDamage;
 
 	// 카운트 증가
 	combatComponent->attackCount++;
