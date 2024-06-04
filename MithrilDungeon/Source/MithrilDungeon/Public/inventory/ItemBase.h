@@ -6,6 +6,8 @@
 #include "ParentItem.h" // 구조체 만든 헤더로 변경
 #include "ItemBase.generated.h"
 
+class UInventoryComponent;
+
 /**
  * 
  */
@@ -19,8 +21,8 @@ class MITHRILDUNGEON_API UItemBase : public UObject // object로 C++만듬
 	// PROPERTIES & VARIABLES
 	//================================================================================
 
-	//UPROPERTY()
-	//UinventoryComponent* OwningInventory; // 인벤토리
+	UPROPERTY()
+	UInventoryComponent* OwningInventory; // 인벤토리
 
 
 	UPROPERTY(VisibleAnywhere, Category = "Item")
@@ -47,10 +49,15 @@ class MITHRILDUNGEON_API UItemBase : public UObject // object로 C++만듬
 	UPROPERTY(VisibleAnywhere, Category = "Item")
 	FItemAssetData AssetData;
 	
+	bool bIsCopy;
+	bool bIsPickup;
+
 	//================================================================================
 	// FUNCTIONS
 	//================================================================================
 	UItemBase();
+
+	void ResetItemFlags(); // 픽업기능 추가
 
 	UItemBase* CreateItemCopy() const; // 아이템 복사
 

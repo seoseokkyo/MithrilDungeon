@@ -4,10 +4,17 @@
 #include "inventory/ItemBase.h"
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 #include "MithrilDungeonCharacter.h"
+#include "inventory/InventoryComponent.h"
+
 
 UItemBase::UItemBase()
 {
 	
+
+}
+
+void UItemBase::ResetItemFlags()
+{
 
 }
 
@@ -34,13 +41,13 @@ void UItemBase::SetQuantity(const int32 NewQuantity)
 	{
 		Quantity = FMath::Clamp(NewQuantity, 0 , NumericData.bisStackable ? NumericData.MaxStackSize : 1); // 참, 거짓
 
-		/*if (OwningInventory)
+		if (OwningInventory)
 		{
 			if (Quantity <= 0)
 			{
-				owningInventory->RemoveItem(this); 수량 0 유지는 의미없어서 그 항목은 제거함.
+				OwningInventory->RemoveSingleInstanceOfItem(this); //수량 0 유지는 의미없어서 그 항목은 제거함.
 			}
-		}*/
+		}
 	}
 
 }

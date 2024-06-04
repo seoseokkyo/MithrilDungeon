@@ -6,6 +6,11 @@
 #include "Components/ActorComponent.h"
 #include "InventoryComponent.generated.h"
 
+
+DECLARE_MULTICAST_DELEGATE(FOnInventoryUpdated); // 멀티캐스트 대리자선언
+
+class UItemBase;
+
 UENUM(BlueprintType)
 enum class EItemAddResult : uint8
 {
@@ -48,12 +53,20 @@ struct FItemAddResult
 
 	static FItemAddResult AddedPartial(const int32 PartialAmountAdded, const FText& ErrorText)
 	{
-
+		FItemAddResult AddedPartialResult;
+		AddedPartialResult.ActualAmountAdded = PartialAmountAdded;
+		AddedPartialResult.operationResult = EItemAddResult::IAR_PartialAmountItemAdded;
+		AddedPartialResult.ResultMessage = ErrorText;
+		return AddedPartialResult;
 	};
 	
 	static FItemAddResult AddedAll(const int32 AmountAdded, const FText& Message)
 	{
-
+		FItemAddResult AddedAllResult;
+		AddedAllResult.ActualAmountAdded = AmountAdded;
+		AddedAllResult.operationResult = EItemAddResult::IAR_AllItemAdded;
+		AddedAllResult.ResultMessage = Message;
+		return AddedAllResult;
 	};
 
 	
@@ -66,13 +79,93 @@ class MITHRILDUNGEON_API UInventoryComponent : public UActorComponent
 	GENERATED_BODY()
 
 public:	
+	//================================================================================
+	// PROPERTIES & VARIABLES
+	//================================================================================
+	FOnInventoryUpdated OnInventoryUpdated; // 대리인의 인스턴스 만들기
+
+
+	//================================================================================
+	// FUNCTIONS
+	//================================================================================
 	UInventoryComponent();
 
-protected:
-	virtual void BeginPlay() override;
-
-public:	
 	virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;
 
+	UFUNCTION(Category = "Inventory")
+	FItemAddResult HandleAddItem(UItemBase* InputItem);
+
+	// 찾기기능
+	UFUNCTION(Category = "Inventory")
+	UItemBase* FindMatchingItem(UItemBase* ItemIn) const;
+
+	UFUNCTION(Category = "Inventory")
+	UItemBase* FindNextItemByID(UItemBase* ItemIn) const;
+	
+	UFUNCTION(Category = "Inventory")
+	UItemBase* FindNextPartialStack(UItemBase* ItemIn) const; // 부분스택찾기
+
+	// 제거기능
+	UFUNCTION(Category = "Inventory")
+	void RemoveSingleInstanceOfItem(UItemBase* ItemIn);
+	
+	UFUNCTION(Category = "Inventory")
+	int32 RemoveAmountOfItem(UItemBase* ItemToRemove, int32 DesiredAmountToRemove);
+	
+	UFUNCTION(Category = "Inventory")
+	void SplitExistingStack(UItemBase* ItemIn, const int32 AmountToSplit);
+
+	// 분할기능, getters
+	// -----------------------------------------
+	UFUNCTION(Category = "Inventory")
+	FORCEINLINE float GetInventoryTotalWeight() const { return InventoryTotalWeight; };
+	
+	UFUNCTION(Category = "Inventory")
+	FORCEINLINE float GetWeightCapacity() const { return InventoryWeightCapacity; }; // 무게
+	
+	UFUNCTION(Category = "Inventory")
+	FORCEINLINE int32 GetSlotsCapacity() const { return InventorySlotsCapacity; }; // 슬롯
+	
+	UFUNCTION(Category = "Inventory")
+	FORCEINLINE TArray<UItemBase*> GetInventoryContents() const { return InventoryContents; }; // 인벤 배열
+
+	//setters
+	// -----------------------------------------
+	UFUNCTION(Category = "Inventory")
+	FORCEINLINE void SetSlotsCapacity(const int32 NewSlotsCapacity) { InventorySlotsCapacity = NewSlotsCapacity; }; // 슬롯용량 설정
+	
+	UFUNCTION(Category = "Inventory")
+	FORCEINLINE void SetWeightCapacity(const float NewWeightCapacity) { InventoryWeightCapacity = NewWeightCapacity; };
+
+protected:
+	
+
+	//================================================================================
+	// PROPERTIES & VARIABLES
+	//================================================================================
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	float InventoryTotalWeight; 
+	
+	UPROPERTY(EditInstanceOnly, Category = "Inventory")
+	int32 InventorySlotsCapacity;
+	
+	UPROPERTY(EditInstanceOnly, Category = "Inventory")
+	float InventoryWeightCapacity;
+
+	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	TArray<TObjectPtr<UItemBase>> InventoryContents; // 많은 내부 포인터를 t개체 포인터로 대체
+
+	//================================================================================
+	// FUNCTIONS
+	//================================================================================
+
+	virtual void BeginPlay() override;
+
+	FItemAddResult HandleNonStackableItems(UItemBase* ItemIn, int32 RequestedAddAmount);
+	int32 HandleStackableItems(UItemBase* InputItem, int32 RequestedAddAmount);// 동일한 인수를 가져올 스택 항목처리
+	int32 CalculateWeightAddAmount(UItemBase* ItemIn, int32 RequestedAddAmount);// 무게추가 계산
+	int32 CalculateNumberForFullStack(UItemBase* StackableItem, int32 InitialRequestedAddAmount); // 초기요청금액
+
+	void AddNewItem(UItemBase* Item, const int32 AmountToAdd);// 새항목추가
 	
 };

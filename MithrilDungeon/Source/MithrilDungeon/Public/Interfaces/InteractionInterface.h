@@ -6,6 +6,7 @@
 #include "UObject/Interface.h"
 #include "InteractionInterface.generated.h"
 
+
 class AMithrilDungeonCharacter; // 클래스전방선언, 다른곳에서 정의 될 것임을 알림
 
 UENUM()
