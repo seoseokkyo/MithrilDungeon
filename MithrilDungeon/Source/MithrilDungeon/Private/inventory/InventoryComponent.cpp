@@ -184,11 +184,13 @@ void UInventoryComponent::AddNewItem(UItemBase* Item, const int32 AmountToAdd)
 
 	if (Item->bIsCopy || Item->bIsPickup)
 	{
+		// 항목이 이미 사본이거나 픽업인 경우
 		NewItem = Item;
 		NewItem->ResetItemFlags();
 	}
 	else
 	{
+		// 그렇지않은경우
 		NewItem = Item->CreateItemCopy(); // 항목 복사본을 생성하고 호출
 	}
 

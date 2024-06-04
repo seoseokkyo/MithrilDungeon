@@ -7,7 +7,7 @@
 #include "inventory/InventoryComponent.h"
 
 
-UItemBase::UItemBase()
+UItemBase::UItemBase() : bIsCopy(false), bIsPickup(false) // 생성자가 생성되는 동시에 값을 넣어줌.
 {
 	
 
@@ -15,7 +15,8 @@ UItemBase::UItemBase()
 
 void UItemBase::ResetItemFlags()
 {
-
+	bIsCopy = false;
+	bIsPickup = false;
 }
 
 UItemBase* UItemBase::CreateItemCopy() const
@@ -30,6 +31,7 @@ UItemBase* UItemBase::CreateItemCopy() const
 	ItemCopy->NumericData = this->NumericData;
 	ItemCopy->ItemStatistics = this ->ItemStatistics;
 	ItemCopy->AssetData = this->AssetData;
+	ItemCopy->bIsCopy = true;
 
 
 	return ItemCopy;

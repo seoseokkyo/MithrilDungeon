@@ -16,6 +16,7 @@ class UInputAction;
 struct FInputActionValue;
 class UCombatComponent;
 class AMithrilDungeonHUD;
+class InventoryComponent;
 
 UENUM()
 enum class MyEnum : int8
@@ -105,6 +106,10 @@ public:
 	// 진원 S
 	FORCEINLINE bool IsInteracting() const {return GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_Interaction); }; // 현재 상호작용중인지 아닌지
 
+	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }; // 인벤토리 가져오기
+
+	void UpdateInteractionWidget() const;
+
 	// 진원 E
 protected:
 	// 진원 S
@@ -141,6 +146,9 @@ protected:
 	// 진원 s
 	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
 	TScriptInterface<IInteractionInterface> TargetInteractable;
+
+	UPROPERTY(VisibleAnywhere, Category = "Character | Inventory")
+	UInventoryComponent* PlayerInventory;
 
 	float InteractionCheckFrequecy;
 

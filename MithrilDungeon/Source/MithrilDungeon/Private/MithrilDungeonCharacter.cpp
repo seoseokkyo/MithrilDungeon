@@ -21,6 +21,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Engine/EngineBaseTypes.h>
 #include "DrawDebugHelpers.h" // 디버그라인
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
+#include "Inventory/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,6 +57,10 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	PlayerInventory->SetSlotsCapacity(20); //인벤토리 슬롯 20개생성
+	PlayerInventory->SetWeightCapacity(50.0f); // 무게용량 50설정
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	//FollowCamera->SetRelativeLocation(FVector(0, 0, 0));
@@ -76,6 +81,8 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	InteractionCheckDistance = 225.0f;  
 
 	BaseEyeHeight = 74.0f; // 플레이어 눈 높이위로
+
+	
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -306,6 +313,13 @@ void AMithrilDungeonCharacter::Interact()
 
 }
 
+void AMithrilDungeonCharacter::UpdateInteractionWidget() const
+{
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		HUD->UpdateInteractionWidget(TargetInteractable->InteractableData); // 포인터(*)확인해볼것
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -352,6 +366,8 @@ void AMithrilDungeonCharacter::CharacterJump(const FInputActionValue& Value)
 
 	Super::Jump();
 }
+
+
 
 void AMithrilDungeonCharacter::Move(const FInputActionValue& Value)
 {
