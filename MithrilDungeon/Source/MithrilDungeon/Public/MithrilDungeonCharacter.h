@@ -17,6 +17,7 @@ struct FInputActionValue;
 class UCombatComponent;
 class AMithrilDungeonHUD;
 class UInventoryComponent;
+class UItemBase;
 
 UENUM()
 enum class MyEnum : int8
@@ -109,6 +110,8 @@ public:
 	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }; // 인벤토리 가져오기
 
 	void UpdateInteractionWidget() const;
+
+	void DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop);
 
 	// 진원 E
 protected:

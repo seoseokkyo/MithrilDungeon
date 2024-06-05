@@ -43,8 +43,8 @@ void UinventoryWidget::NativeOnDragDetected(const FGeometry& InGeometry, const F
 	UitemDragDropOperation* DragDropOperation = NewObject<UitemDragDropOperation>();
 	this->SetVisibility(ESlateVisibility::HitTestInvisible);
 
-	DragDropOperation->WidgetReference = this;
-	DragDropOperation->DragOffset = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
+	//DragDropOperation->WidgetReference = this;
+	//DragDropOperation->DragOffset = InGeometry.AbsoluteToLocal(InMouseEvent.GetScreenSpacePosition());
 
 	DragDropOperation->DefaultDragVisual = this;
 	DragDropOperation->Pivot = EDragPivot::MouseDown;

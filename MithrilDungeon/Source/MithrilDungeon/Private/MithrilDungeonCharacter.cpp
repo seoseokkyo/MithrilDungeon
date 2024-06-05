@@ -21,6 +21,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Engine/EngineBaseTypes.h>
 #include "DrawDebugHelpers.h" // 디버그라인
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
+#include "World/Pickup.h"
 #include "Inventory/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -327,6 +328,34 @@ void AMithrilDungeonCharacter::ToggleMenu()
 {
 	HUD->ToggleMenu();
 
+}
+
+void AMithrilDungeonCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)
+{
+	// 인벤토리 null이 아니라면
+	if (PlayerInventory->FindMatchingItem(ItemToDrop))
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.bNoFail = true;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		// 캐릭터 50앞방향에서 생성됨
+		const FVector SpawnLocation{GetActorLocation() + (GetActorForwardVector() * 50.0f)};
+
+		const FTransform SpawnTransform (GetActorRotation(), SpawnLocation);
+
+		// 수량제거
+		const int32 RemoveQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
+
+		APickup* Pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(), SpawnTransform, SpawnParams);
+
+		Pickup->InitializeDrop(ItemToDrop, RemoveQuantity);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Warning, TEXT("Item to drop was Some how null"));
+	}
 }
 
 //////////////////////////////////////////////////////////////////////////

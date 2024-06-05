@@ -3,6 +3,8 @@
 
 #include "Interfaces/MainMenuWidget.h"
 #include "MithrilDungeonCharacter.h"
+#include "inventory/itemDragDropOperation.h"
+#include "inventory/ItemBase.h"
 
 void UMainMenuWidget::NativeOnInitialized()
 {
@@ -21,10 +23,15 @@ void UMainMenuWidget::NativeConstruct()
 // 마우스를 클릭하고 드래그할때 데이터보관
 bool UMainMenuWidget::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
-	Super::NativeOnDrop(InGeometry, InDragDropEvent, InOperation);
+	const UitemDragDropOperation* ItemDragDrop = Cast <UitemDragDropOperation>(InOperation);
+
+	if (PlayerCharacter && ItemDragDrop->SourceItem)
+	{
+		PlayerCharacter->DropItem(ItemDragDrop->SourceItem, ItemDragDrop->SourceItem->Quantity);
+		return true;
+	}
+	return false;
 
 	// Cast Operation to item drag drop, ensure player is valid, call drop item on player 플레이어가 플레이어에서 휴효한 호출 드롭항목인지 확인
 
-
-	return false;
 }

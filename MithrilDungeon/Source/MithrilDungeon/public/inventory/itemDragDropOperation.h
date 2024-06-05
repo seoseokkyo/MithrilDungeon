@@ -8,6 +8,9 @@
 #include "itemDragDropOperation.generated.h"
 
 // Operation
+
+class UItemBase;
+class UInventoryComponent;
 /**
  * 
  */
@@ -19,14 +22,10 @@ class MITHRILDUNGEON_API UitemDragDropOperation : public UDragDropOperation
 public:
 
 	
-	// 화면에서 드래그하려는 UMG위젯 담는데 사용
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	UUserWidget* WidgetReference;
+	UPROPERTY()
+	UItemBase* SourceItem;
 
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	FVector2D DragOffset;
-
-
+	UPROPERTY()
+	UInventoryComponent* SourceInventory;
 	
 };

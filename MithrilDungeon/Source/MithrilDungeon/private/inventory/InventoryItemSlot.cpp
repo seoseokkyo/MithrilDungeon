@@ -7,6 +7,8 @@
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/Image.h>
 #include "Inventory/InventoryTooltip.h"
 #include "inventory/ItemBase.h"
+#include "DragItemVisual.h"
+#include "inventory/itemDragDropOperation.h"
 
 
 void UInventoryItemSlot::NativeOnInitialized()
@@ -37,13 +39,13 @@ void UInventoryItemSlot::NativeConstruct()
 			ItemBorder->SetBrushColor(FLinearColor::White);
 			break;
 		case EItemQuality::Quality: 
-			ItemBorder->SetBrushColor(FLinearColor::Green);
+			ItemBorder->SetBrushColor(FLinearColor(0.0f, 0.51f, 0.169f));
 			break;
 		case EItemQuality::Masterwork: 
-			ItemBorder->SetBrushColor(FLinearColor::Blue);
+			ItemBorder->SetBrushColor(FLinearColor(0.0f, 0.4f, 0.75f));
 			break;
 		case EItemQuality::Grandmaster: 
-			ItemBorder->SetBrushColor(FLinearColor(100.0f, 65.0f, 0.0f, 1.0f)); // 주황색
+			ItemBorder->SetBrushColor(FLinearColor(1.0f, 0.45f, 0.0f)); // 주황색
 			break;
 		default: 
 			break;
@@ -65,8 +67,17 @@ void UInventoryItemSlot::NativeConstruct()
 
 FReply UInventoryItemSlot::NativeOnMouseButtonDown(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent)
 {
+	FReply Reply = Super::NativeOnMouseButtonDown(InGeometry, InMouseEvent);
+	
+	if (InMouseEvent.GetEffectingButton() == EKeys::LeftMouseButton)
+	{
+		return Reply.Handled().DetectDrag(TakeWidget(), EKeys::LeftMouseButton);
+	}
 
-	return Super::NativeOnMouseButtonDown(InGeometry,InMouseEvent);
+	// 오른쪽 하위메뉴 여기클릭
+
+	return Reply.Unhandled();
+	
 }
 
 void UInventoryItemSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
@@ -78,6 +89,24 @@ void UInventoryItemSlot::NativeOnMouseLeave(const FPointerEvent& InMouseEvent)
 void UInventoryItemSlot::NativeOnDragDetected(const FGeometry& InGeometry, const FPointerEvent& InMouseEvent, UDragDropOperation*& OutOperation)
 {
 	Super::NativeOnDragDetected(InGeometry,InMouseEvent,OutOperation);
+
+	if (DragItemVisualClass)
+	{
+		const TObjectPtr<UDragItemVisual> DragVisual = CreateWidget<UDragItemVisual>(this, DragItemVisualClass);
+		DragVisual-> ItemIcon->SetBrushFromTexture(ItemReference->AssetData.Icon);// 항목슬롯아이콘의 축소버전
+		DragVisual->ItemBorder->SetBrushColor(ItemBorder->GetBrushColor());
+		DragVisual->ItemQuantity->SetText(FText::AsNumber(ItemReference->Quantity));
+
+		UitemDragDropOperation* DragItemOperation = NewObject<UitemDragDropOperation>(); // 생성자가없으므로 호출할필요 x
+		DragItemOperation->SourceItem = ItemReference;
+		DragItemOperation->SourceInventory = ItemReference->OwningInventory;
+
+		DragItemOperation->DefaultDragVisual = DragVisual;
+		DragItemOperation->Pivot = EDragPivot::TopLeft;
+
+		OutOperation = DragItemOperation;
+
+	}
 
 }
 
