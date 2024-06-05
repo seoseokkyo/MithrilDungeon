@@ -182,6 +182,7 @@ void AMithrilDungeonCharacter::NetMulticastRPC_ToggleCombat_Implementation()
 }
 
 
+
 void AMithrilDungeonCharacter::PerformInteractionCheck()
 {
 	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
@@ -321,6 +322,13 @@ void AMithrilDungeonCharacter::UpdateInteractionWidget() const
 	}
 }
 
+
+void AMithrilDungeonCharacter::ToggleMenu()
+{
+	HUD->ToggleMenu();
+
+}
+
 //////////////////////////////////////////////////////////////////////////
 // Input
 
@@ -344,10 +352,13 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(ToggleCombatAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleCombatFunction);
 
 		// 인벤토리 열고닫기
-		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleMenu);
+		/*EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);*/
+		
 
 		// 물체 상호작용
 		EnhancedInputComponent->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::BeginInteract);
+		
 
 		EnhancedInputComponent->BindAction(IA_Released, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::EndInteract);
 	}

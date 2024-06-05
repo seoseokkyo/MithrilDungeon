@@ -39,6 +39,8 @@ public:
 
 	void DisplayMenu(); // 표시메뉴기능
 	void HideMenu(); // 메뉴숨기기
+	void ToggleMenu();
+
 
 	void ShowInteractionWidget()const;
 	void HideInteractionWidget()const;

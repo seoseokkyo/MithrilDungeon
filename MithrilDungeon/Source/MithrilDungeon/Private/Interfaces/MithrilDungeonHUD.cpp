@@ -47,6 +47,28 @@ void AMithrilDungeonHUD::HideMenu()
 	}
 }
 
+void AMithrilDungeonHUD::ToggleMenu()
+{
+	if (bIsMenuVisible)
+	{
+		HideMenu();
+
+		const FInputModeGameOnly InputMode; // 게임화면만 클릭하도록 설정
+		GetOwningPlayerController()->SetInputMode(InputMode);
+		GetOwningPlayerController()->SetShowMouseCursor(false);
+	}
+	else
+	{
+		DisplayMenu();
+
+		const FInputModeGameAndUI InputMode; // UI만 클릭하도록 설정
+		GetOwningPlayerController()->SetInputMode(InputMode);
+		GetOwningPlayerController()->SetShowMouseCursor(true);
+	}
+
+
+}
+
 void AMithrilDungeonHUD::ShowInteractionWidget()const
 {
 	if (InteractionWidget)

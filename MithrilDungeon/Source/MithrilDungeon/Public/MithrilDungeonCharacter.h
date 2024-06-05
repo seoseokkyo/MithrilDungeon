@@ -16,7 +16,7 @@ class UInputAction;
 struct FInputActionValue;
 class UCombatComponent;
 class AMithrilDungeonHUD;
-class InventoryComponent;
+class UInventoryComponent;
 
 UENUM()
 enum class MyEnum : int8
@@ -157,6 +157,10 @@ protected:
 	FTimerHandle TimerHandle_Interaction; 
 
 	FInteractionData InteractionData;
+
+	void ToggleMenu();
+
+
 
 	void PerformInteractionCheck();
 	void FoundInteractable(AActor* NewInteractable); // 상호작용 가능항목호출, 새 상호작용 가능항목 가져오기

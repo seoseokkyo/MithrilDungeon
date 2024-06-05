@@ -10,10 +10,18 @@
 class UDataTable;
 
 UENUM(BlueprintType)
-enum class EItemType : uint8
+enum class EItemType : uint8	// 아이템 종류, 갑옷, 무기 , 퀘스트아이템 등
 {
 	Expendable,
-	Equipmentable
+	Equipmentable,
+	Armor UMETA(DisplayName = "Armor"),
+	Weapon UMETA(DisplayName = "Weapon"),
+	Shield UMETA(DisplayName = "Shield"),
+	Spell UMETA(DisplayName = "Spell"),
+	Consumable UMETA(DisplayName = "Consumable"),
+	Quest UMETA(DisplayName = "Quest"),
+	Mundane UMETA(DisplayName = "Mundane")
+
 };
 
 // HJW
@@ -27,17 +35,17 @@ enum class EItemQuality : uint8 // 품질, 등급
 	Grandmaster UMETA(DisplayName = "Grandmaster")
 };
 
-UENUM()
-enum class EItemTypes : uint8 // 아이템 종류, 갑옷, 무기 , 퀘스트아이템 등
-{
-	Armor UMETA(DisplayName = "Armor"),
-	Weapon UMETA(DisplayName = "Weapon"),
-	Shield UMETA(DisplayName = "Shield"),
-	Spell UMETA(DisplayName = "Spell"),
-	Consumable UMETA(DisplayName = "Consumable"),
-	Quest UMETA(DisplayName = "Quest"),
-	Mundane UMETA(DisplayName = "Mundane")
-};
+//UENUM()
+//enum class EItemTypes : uint8 // 아이템 종류, 갑옷, 무기 , 퀘스트아이템 등
+//{
+//	/*Armor UMETA(DisplayName = "Armor"),
+//	Weapon UMETA(DisplayName = "Weapon"),
+//	Shield UMETA(DisplayName = "Shield"),
+//	Spell UMETA(DisplayName = "Spell"),
+//	Consumable UMETA(DisplayName = "Consumable"),
+//	Quest UMETA(DisplayName = "Quest"),
+//	Mundane UMETA(DisplayName = "Mundane")*/
+//};
 
 USTRUCT()
 struct FItemStatistics // 스텟에 더할값.

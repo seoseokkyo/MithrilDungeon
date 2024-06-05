@@ -116,7 +116,7 @@ void UInventoryComponent::SplitExistingStack(UItemBase* ItemIn, const int32 Amou
 	}
 }
 
-FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem, int32 RequestedAddAmount)
+FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem)
 {
 	// 유효한 가중치가 있는지 확인, 용량이없을경우
 	if (FMath::IsNearlyZero(InputItem->GetItemSingleWeight()) || InputItem->GetItemSingleWeight() < 0)
@@ -137,13 +137,14 @@ FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem
 	}
 
 	// 다 통과했으면 성공
-	AddNewItem(InputItem, RequestedAddAmount);
-	return FItemAddResult::AddedAll(RequestedAddAmount,FText::Format(FText::FromString("Successfully added {0} {1} to the inventory."), RequestedAddAmount, InputItem->TextData.Name));
+	AddNewItem(InputItem, 1);
+
+	return FItemAddResult::AddedAll(1,FText::Format(FText::FromString("Successfully added a single {0} to the inventory."), InputItem->TextData.Name));
 }
 
 int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 RequestedAddAmount)
 {
-	return int32();
+	return 0;
 }
 
 FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* InputItem)
@@ -154,7 +155,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* InputItem)
 		// handle non-stackable items
 		if (!InputItem->NumericData.bisStackable)
 		{
-			return HandleNonStackableItems(InputItem, InitialRequestedAddAmount);
+			return HandleNonStackableItems(InputItem);
 		}
 	
 		// handle stakckable 값 추가
@@ -162,20 +163,22 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* InputItem)
 
 		if (StackableAmountAdded == InitialRequestedAddAmount)
 		{
-			// return added all result
+			return FItemAddResult::AddedAll(InitialRequestedAddAmount, FText::Format(FText::FromString("Successfully added {0} {1} to the inventory."), InitialRequestedAddAmount, InputItem->TextData.Name));
 		}
 
 		if (StackableAmountAdded < InitialRequestedAddAmount && StackableAmountAdded > 0)
 		{
-			// return added partial result
+			return FItemAddResult::AddedPartial(StackableAmountAdded, FText::Format(FText::FromString("Partial amount of {0} added to the inventory. Number added = {1}"),InputItem->TextData.Name, StackableAmountAdded));
 		}
 
 		if (StackableAmountAdded <= 0) // 추가된 값이 0보다 작으면 안되지만
 		{
-			// return added none result
+			return FItemAddResult::AddedNone(FText::Format(FText::FromString("Couldn't add {0} to the inventory. No remaining inventory slots, or invalid item."), InputItem->TextData.Name));
 		}
 	}
-	return HandleNonStackableItems(InputItem, 3); // 영상보고 수정해줘야함 아이템베이스할차례
+
+	check(false);
+	return FItemAddResult::AddedNone(FText::FromString("TryAddItem fallthrough error. GetOwner() check somehow failed."));
 }
 
 void UInventoryComponent::AddNewItem(UItemBase* Item, const int32 AmountToAdd)

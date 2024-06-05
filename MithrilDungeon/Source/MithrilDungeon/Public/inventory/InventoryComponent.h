@@ -161,7 +161,7 @@ protected:
 
 	virtual void BeginPlay() override;
 
-	FItemAddResult HandleNonStackableItems(UItemBase* ItemIn, int32 RequestedAddAmount);
+	FItemAddResult HandleNonStackableItems(UItemBase* ItemIn);
 	int32 HandleStackableItems(UItemBase* InputItem, int32 RequestedAddAmount);// 동일한 인수를 가져올 스택 항목처리
 	int32 CalculateWeightAddAmount(UItemBase* ItemIn, int32 RequestedAddAmount);// 무게추가 계산
 	int32 CalculateNumberForFullStack(UItemBase* StackableItem, int32 InitialRequestedAddAmount); // 초기요청금액
