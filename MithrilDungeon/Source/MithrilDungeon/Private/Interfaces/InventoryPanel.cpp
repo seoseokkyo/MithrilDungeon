@@ -29,14 +29,22 @@ void UInventoryPanel::NativeOnInitialized()
 void UInventoryPanel::SetInfoText() const
 {
 	// 무게
-	WeightInfo->SetText(FText::Format(FText::FromString("{0}/{1}"),
-	InventoryReference->GetInventoryTotalWeight(),
-	InventoryReference->GetWeightCapacity()));
+	const FString WeightInfoValue
+	{
+		FString::SanitizeFloat(InventoryReference->GetInventoryTotalWeight()) + "/"
+		+ FString::SanitizeFloat(InventoryReference->GetWeightCapacity())
+	};
+
 
 	// 용량
-	CapacityInfo->SetText(FText::Format(FText::FromString("{0}/{1}"),
-	InventoryReference->GetInventoryContents().Num(),
-	InventoryReference->GetSlotsCapacity()));
+	const FString CapacityInfoValue
+	{
+		FString::FromInt(InventoryReference->GetInventoryContents().Num()) + "/"
+		+ FString::FromInt(InventoryReference->GetSlotsCapacity())
+	};
+
+	WeightInfo->SetText(FText::FromString(WeightInfoValue));
+	CapacityInfo->SetText(FText::FromString(CapacityInfoValue));
 
 }
 
