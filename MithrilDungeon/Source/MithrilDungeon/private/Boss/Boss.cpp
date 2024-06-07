@@ -46,16 +46,16 @@ void ABoss::BeginPlay()
 	Super::BeginPlay();
 
 	// 월드에 있는 플레이어를 찾는다.
-	for (TActorIterator<AMithrilDungeonCharacter> findActor(GetWorld()); findActor; ++findActor)
-	{
-		Player = *findActor;
-	}
+	//for (TActorIterator<AMithrilDungeonCharacter> findActor(GetWorld()); findActor; ++findActor)
+	//{
+	//	Player = *findActor;
+	//}
 
 	SpawnDefaultController();
 	aiCon = GetController<AAIController>();
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
-	enemyState = EBoseState::IDLE;
+	enemyState = EEnemyState::IDLE;
 
 	if (characterName == TEXT("Skeleton"))
 	{
@@ -100,9 +100,9 @@ void ABoss::Tick(float DeltaTime)
 
 	if (bDead)
 	{
-		if (enemyState != EBoseState::DIE)
+		if (enemyState != EEnemyState::DIE)
 		{
-			enemyState = EBoseState::DIE;
+			enemyState = EEnemyState::DIE;
 		}
 
 		return;
@@ -110,25 +110,25 @@ void ABoss::Tick(float DeltaTime)
 
 	switch (enemyState)
 	{
-	case EBoseState::IDLE:
+	case EEnemyState::IDLE:
 		Idle();
 		break;
-	case EBoseState::MOVE:
+	case EEnemyState::MOVE:
 		MoveTotaget();
 		break;
-	case EBoseState::ATTACK:
+	case EEnemyState::ATTACK:
 		Attack();
 		break;
-	case EBoseState::ATTACKDELAY:
+	case EEnemyState::ATTACKDELAY:
 		AttackDelay();
 		break;
-	case EBoseState::RETURN:
+	case EEnemyState::RETURN:
 
 		break;
-	case EBoseState::DAMAGED:
+	case EEnemyState::DAMAGED:
 
 		break;
-	case EBoseState::DIE:
+	case EEnemyState::DIE:
 		Die();
 		break;
 	default:
@@ -177,7 +177,7 @@ void ABoss::MoveTotaget()
 		}
 		if (FVector::Distance(GetActorLocation(), targetLoc) <= attackDistance)
 		{
-			enemyState = EBoseState::ATTACK;
+			enemyState = EEnemyState::ATTACK;
 		}
 	}
 }
@@ -203,7 +203,7 @@ void ABoss::Attack()
 		AttackEvent();
 
 		UE_LOG(LogTemp, Warning, TEXT("AttackAM!!"))
-			enemyState = EBoseState::ATTACKDELAY;
+			enemyState = EEnemyState::ATTACKDELAY;
 	}
 }
 
@@ -213,7 +213,7 @@ void ABoss::AttackDelay()
 
 	FTimerHandle AttackTimer;
 	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [&]() {
-		enemyState = EBoseState::IDLE;
+		enemyState = EEnemyState::IDLE;
 		}, 3, false);
 }
 
@@ -242,13 +242,13 @@ void ABoss::OnDamaged(int32 dmg)
 	EnemyCurrentHP = FMath::Clamp(EnemyCurrentHP - dmg, 0, 100);
 	if (EnemyCurrentHP <= 0)
 	{
-		enemyState = EBoseState::DIE;
+		enemyState = EEnemyState::DIE;
 
 
 	}
 	else
 	{
-		enemyState = EBoseState::DAMAGED;
+		enemyState = EEnemyState::DAMAGED;
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance)
 		{
@@ -264,7 +264,6 @@ void ABoss::SearchPlayer()
 	//UE_LOG(LogTemp, Warning, TEXT("sug"));
 
 	Player = nullptr;
-
 
 	float nearestDist = 9999999.9f;
 
@@ -293,11 +292,11 @@ void ABoss::SearchPlayer()
 
 	if (Player == nullptr)
 	{
-		enemyState = EBoseState::IDLE;
+		enemyState = EEnemyState::IDLE;
 	}
 	else
 	{
-		enemyState = EBoseState::MOVE;
+		enemyState = EEnemyState::MOVE;
 	}
 }
 

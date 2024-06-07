@@ -182,15 +182,12 @@ void AMithrilDungeonCharacter::NetMulticastRPC_ToggleCombat_Implementation()
 		}, animPlayTime, false, 1.0f);
 }
 
-
-
 void AMithrilDungeonCharacter::PerformInteractionCheck()
 {
 	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 
 	FVector TraceStart {GetPawnViewLocation()}; // 명시적 초기화, 대괄호
 	FVector TraceEnd {TraceStart + (GetViewRotation().Vector() * InteractionCheckDistance)}; // 마우스로 보기로 변경
-
 
 	float LookDirection = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector()); // 내적함수
 

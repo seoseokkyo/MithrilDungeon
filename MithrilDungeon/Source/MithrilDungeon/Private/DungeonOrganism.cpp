@@ -105,6 +105,8 @@ void ADungeonOrganism::AttackEvent()
 	{
 		PerformAttack(combatComponent->attackCount, false);
 	}	
+
+	
 }
 
 void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)

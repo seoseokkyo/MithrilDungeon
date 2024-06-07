@@ -4,19 +4,8 @@
 
 #include "CoreMinimal.h"
 #include "DungeonOrganism.h"
+#include "Enemy.h"
 #include "Boss.generated.h"
-
-UENUM(BlueprintType)
-enum class EBoseState : uint8
-{
-	IDLE,		
-	MOVE,		
-	ATTACK,		
-	ATTACKDELAY,	
-	RETURN,		
-	DAMAGED,		
-	DIE			
-};
 
 class UCombatComponent;
 
@@ -35,7 +24,7 @@ public:
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
 	UPROPERTY(Replicated, EditAnywhere, Category = "MySettings")
-	EBoseState enemyState = EBoseState::IDLE;
+	EEnemyState enemyState = EEnemyState::IDLE;
 
 	//UPROPERTY(EditAnywhere, Category = "MySettings")
 	//class UStaticMeshComponent* swordComp;
