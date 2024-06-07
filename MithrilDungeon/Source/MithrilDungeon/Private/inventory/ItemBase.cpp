@@ -4,11 +4,19 @@
 #include "inventory/ItemBase.h"
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 #include "MithrilDungeonCharacter.h"
+#include "inventory/InventoryComponent.h"
 
-UItemBase::UItemBase()
+
+UItemBase::UItemBase() : bIsCopy(false), bIsPickup(false) // 생성자가 생성되는 동시에 값을 넣어줌.
 {
 	
 
+}
+
+void UItemBase::ResetItemFlags()
+{
+	bIsCopy = false;
+	bIsPickup = false;
 }
 
 UItemBase* UItemBase::CreateItemCopy() const
@@ -23,6 +31,7 @@ UItemBase* UItemBase::CreateItemCopy() const
 	ItemCopy->NumericData = this->NumericData;
 	ItemCopy->ItemStatistics = this ->ItemStatistics;
 	ItemCopy->AssetData = this->AssetData;
+	ItemCopy->bIsCopy = true;
 
 
 	return ItemCopy;
@@ -34,13 +43,13 @@ void UItemBase::SetQuantity(const int32 NewQuantity)
 	{
 		Quantity = FMath::Clamp(NewQuantity, 0 , NumericData.bisStackable ? NumericData.MaxStackSize : 1); // 참, 거짓
 
-		/*if (OwningInventory)
+		if (OwningInventory)
 		{
 			if (Quantity <= 0)
 			{
-				owningInventory->RemoveItem(this); 수량 0 유지는 의미없어서 그 항목은 제거함.
+				OwningInventory->RemoveSingleInstanceOfItem(this); //수량 0 유지는 의미없어서 그 항목은 제거함.
 			}
-		}*/
+		}
 	}
 
 }

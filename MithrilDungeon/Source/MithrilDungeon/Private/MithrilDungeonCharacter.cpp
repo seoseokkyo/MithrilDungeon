@@ -21,6 +21,8 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Engine/EngineBaseTypes.h>
 #include "DrawDebugHelpers.h" // 디버그라인
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
+#include "World/Pickup.h"
+#include "Inventory/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -56,6 +58,10 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
+	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	PlayerInventory->SetSlotsCapacity(20); //인벤토리 슬롯 20개생성
+	PlayerInventory->SetWeightCapacity(50.0f); // 무게용량 50설정
+
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
 	//FollowCamera->SetRelativeLocation(FVector(0, 0, 0));
@@ -76,6 +82,8 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	InteractionCheckDistance = 225.0f;  
 
 	BaseEyeHeight = 74.0f; // 플레이어 눈 높이위로
+
+	
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -173,6 +181,7 @@ void AMithrilDungeonCharacter::NetMulticastRPC_ToggleCombat_Implementation()
 
 		}, animPlayTime, false, 1.0f);
 }
+
 
 
 void AMithrilDungeonCharacter::PerformInteractionCheck()
@@ -306,6 +315,48 @@ void AMithrilDungeonCharacter::Interact()
 
 }
 
+void AMithrilDungeonCharacter::UpdateInteractionWidget() const
+{
+	if (IsValid(TargetInteractable.GetObject()))
+	{
+		HUD->UpdateInteractionWidget(TargetInteractable->InteractableData); // 포인터(*)확인해볼것
+	}
+}
+
+
+void AMithrilDungeonCharacter::ToggleMenu()
+{
+	HUD->ToggleMenu();
+
+}
+
+void AMithrilDungeonCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)
+{
+	// 인벤토리 null이 아니라면
+	if (PlayerInventory->FindMatchingItem(ItemToDrop))
+	{
+		FActorSpawnParameters SpawnParams;
+		SpawnParams.Owner = this;
+		SpawnParams.bNoFail = true;
+		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
+
+		// 캐릭터 50앞방향에서 생성됨
+		const FVector SpawnLocation{GetActorLocation() + (GetActorForwardVector() * 50.0f)};
+
+		const FTransform SpawnTransform (GetActorRotation(), SpawnLocation);
+
+		// 수량제거
+		const int32 RemoveQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
+
+		APickup* Pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(), SpawnTransform, SpawnParams);
+
+		Pickup->InitializeDrop(ItemToDrop, RemoveQuantity);
+	}
+	else
+	{
+		UE_LOG(LogTemp,Warning, TEXT("Item to drop was Some how null"));
+	}
+}
 
 //////////////////////////////////////////////////////////////////////////
 // Input
@@ -330,10 +381,13 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(ToggleCombatAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleCombatFunction);
 
 		// 인벤토리 열고닫기
-		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);
+		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleMenu);
+		/*EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);*/
+		
 
 		// 물체 상호작용
 		EnhancedInputComponent->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::BeginInteract);
+		
 
 		EnhancedInputComponent->BindAction(IA_Released, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::EndInteract);
 	}
@@ -352,6 +406,8 @@ void AMithrilDungeonCharacter::CharacterJump(const FInputActionValue& Value)
 
 	Super::Jump();
 }
+
+
 
 void AMithrilDungeonCharacter::Move(const FInputActionValue& Value)
 {

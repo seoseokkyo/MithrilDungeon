@@ -16,6 +16,8 @@ class UInputAction;
 struct FInputActionValue;
 class UCombatComponent;
 class AMithrilDungeonHUD;
+class UInventoryComponent;
+class UItemBase;
 
 UENUM()
 enum class MyEnum : int8
@@ -105,6 +107,12 @@ public:
 	// 진원 S
 	FORCEINLINE bool IsInteracting() const {return GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_Interaction); }; // 현재 상호작용중인지 아닌지
 
+	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }; // 인벤토리 가져오기
+
+	void UpdateInteractionWidget() const;
+
+	void DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop);
+
 	// 진원 E
 protected:
 	// 진원 S
@@ -142,6 +150,9 @@ protected:
 	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
 	TScriptInterface<IInteractionInterface> TargetInteractable;
 
+	UPROPERTY(VisibleAnywhere, Category = "Character | Inventory")
+	UInventoryComponent* PlayerInventory;
+
 	float InteractionCheckFrequecy;
 
 	float InteractionCheckDistance; // 추적이 캐릭터에서 얼마나 멀리 발사될지
@@ -149,6 +160,10 @@ protected:
 	FTimerHandle TimerHandle_Interaction; 
 
 	FInteractionData InteractionData;
+
+	void ToggleMenu();
+
+
 
 	void PerformInteractionCheck();
 	void FoundInteractable(AActor* NewInteractable); // 상호작용 가능항목호출, 새 상호작용 가능항목 가져오기

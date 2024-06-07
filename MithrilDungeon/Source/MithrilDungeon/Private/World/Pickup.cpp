@@ -4,6 +4,8 @@
 #include "World/Pickup.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Components/StaticMeshComponent.h>
 #include "inventory/ItemBase.h"
+#include "MithrilDungeonCharacter.h"
+#include "Inventory/InventoryComponent.h"
 
 // Sets default values
 APickup::APickup()
@@ -91,7 +93,7 @@ void APickup::EndFocus()
 {
 	if (PickupMesh)
 	{
-		PickupMesh->SetRenderCustomDepth(true);
+		PickupMesh->SetRenderCustomDepth(false);
 	}
 }
 
@@ -112,12 +114,39 @@ void APickup::TakePickup(const AMithrilDungeonCharacter* Taker)
 	{
 		if (ItemReference)
 		{
-			//if (UInventoryComponent* PlayerInventory = Taker->GetInventory());
+			if (UInventoryComponent* PlayerInventory = Taker->GetInventory())
+			{
+				// 플레이어 인벤토리에 항목을 추가한 다음
+				// 결과에따라 항목을 조정하거나 파괴.
+				const FItemAddResult AddResult = PlayerInventory->HandleAddItem(ItemReference);
 
-			// 플레이어 인벤토리에 항목을 추가한 다음
-			// 결과에따라 항목을 조정하거나 파괴.
+				switch (AddResult.operationResult)
+				{
+				case EItemAddResult::IAR_NoItemAdded:
+					break; // 아무것도하지않음
+				case EItemAddResult::IAR_PartialAmountItemAdded:
+					UpdateInteractableData(); // 픽업수량업데이트
+					Taker->UpdateInteractionWidget(); // 위젯업데이트
+					break;
+				case EItemAddResult::IAR_AllItemAdded:
+					Destroy();
+					break;
+				default:
+					break;
+				}
+				UE_LOG(LogTemp,Warning, TEXT("%s"), *AddResult.ResultMessage.ToString());
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("Player inventory conponent is null!!")); // 인벤토리가 널
+			}
 		}
-	}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Pickup internal item reference was somenow null!!")); // 픽업이 널
+		}
+	}	
+
 }
 
 void APickup::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent)
