@@ -17,7 +17,7 @@ AblueZoneActor::AblueZoneActor()
 	meshComp->SetupAttachment(RootComponent);
 
 	meshComp->SetGenerateOverlapEvents(true);
-	meshComp->SetWorldScale3D(FVector(75.0f));
+	//meshComp->SetWorldScale3D(FVector(120));
 
 }
 
@@ -26,13 +26,15 @@ void AblueZoneActor::BeginPlay()
 	Super::BeginPlay();
 
 	//meshComp->OnComponentBeginOverlap.AddDynamic(this, &AblueZoneActor::BeginOverlap);
-	meshComp->SetWorldScale3D(FVector(75.0f));
+	//meshComp->SetWorldScale3D(FVector(120));
 
 	// 현재 남아있는 플레이어 검색
 	for (TActorIterator<AMithrilDungeonCharacter> findActor(GetWorld()); findActor; ++findActor)
 	{
 		remainPlayers.Add(*findActor);
 	}
+
+	SettedScale = GetActorScale();
 }
 
 void AblueZoneActor::Tick(float DeltaTime)
@@ -51,8 +53,8 @@ void AblueZoneActor::Tick(float DeltaTime)
 	{
 		blueZoneTime += DeltaTime;
 		// 2분동안 원을 줄어들게 만들고 싶다.
-		FVector three = FVector(FMath::Lerp(75, 0, blueZoneTime / 120.0f));
-		Rad = three.X * 100 / 2;
+		FVector three = FVector(FMath::Lerp(SettedScale.X, 0, blueZoneTime / 120.0f));
+		Rad = three.X * 50.0f;
 
 		meshComp->SetWorldScale3D(FVector(three));
 		if (blueZoneTime >= 120.0f)
@@ -61,49 +63,76 @@ void AblueZoneActor::Tick(float DeltaTime)
 			bblueZoneStart = false;
 		}
 
-		TArray<FHitResult> hits;
-		FCollisionObjectQueryParams params;
-
-		params.AddObjectTypesToQuery(ECC_PhysicsBody);
-		params.AddObjectTypesToQuery(ECC_Pawn);
-		params.AddObjectTypesToQuery(ECC_Visibility);
-
-		//GetWorld()->SweepMultiByObjectType(hits, GetActorLocation(), GetActorLocation(), FQuat::Identity, params, FCollisionShape::MakeSphere(Rad));
-
-		GetWorld()->SweepMultiByChannel(hits, GetActorLocation(), GetActorLocation(), FQuat::Identity, ECC_Visibility, FCollisionShape::MakeSphere(Rad));
-
-		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("BlueZone Rad : %f"), Rad));
-
-		for (auto remain : remainPlayers)
+		for (const auto& remain : remainPlayers)
 		{
-			bool bFind = false;
+			FVector playerLoc = remain->GetActorLocation();
+			FVector bluezoneLoc = GetActorLocation();
 
-			for (auto hit : hits)
+			float dist = FVector::Dist(playerLoc, bluezoneLoc);
+
+			bool bCheck = false;
+
+			if (playerLoc.X <= bluezoneLoc.X - Rad && playerLoc.X >= bluezoneLoc.X + Rad)
 			{
-				auto pc = Cast<AMithrilDungeonCharacter>(hit.GetActor());
-				if (pc != nullptr)
-				{
-					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Hit Character : %s"), *pc->GetActorNameOrLabel()));
-				}
-
-				if (remain == hit.GetActor())
-				{
-					bFind = true;
-					break;
-				}
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InSize X")));
+				bCheck = true;
 			}
 
-			if (bFind == false)
+			if (playerLoc.Y <= bluezoneLoc.Y - Rad && playerLoc.Y >= bluezoneLoc.Y + Rad)
+			{
+				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InSize Y")));
+				bCheck = true;
+			}
+
+			if(Rad < dist && bCheck == false)
 			{
 				auto pc = Cast<AMithrilDungeonCharacter>(remain);
 				if (pc != nullptr)
 				{
-					pc->ServerRPC_AmountDamage(3* DeltaTime);
-
-					//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Damaged By BlueZone : %s"), *pc->GetActorNameOrLabel()));
+					pc->ServerRPC_AmountDamage(3 * DeltaTime);
 				}
 			}
 		}
+
+		//TArray<FHitResult> hits;
+
+		// Sweep 너무느림
+		//GetWorld()->SweepMultiByChannel(hits, GetActorLocation(), GetActorLocation(), FQuat::Identity, ECC_Pawn, FCollisionShape::MakeSphere(Rad));
+
+		//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("BlueZone Rad : %f"), Rad));
+
+		// Sweep
+	//	for (const auto& remain : remainPlayers)
+	//	{
+	//		bool bFind = false;
+
+	//		for (const auto& hit : hits)
+	//		{
+	//			//auto pc = Cast<AMithrilDungeonCharacter>(hit.GetActor());
+	//			//if (pc != nullptr)
+	//			//{
+	//			//	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Hit Character : %s"), *pc->GetActorNameOrLabel()));
+	//			//}
+
+	//			if (remain == hit.GetActor())
+	//			{
+	//				bFind = true;
+	//				break;
+	//			}
+	//		}
+
+	//		if (bFind == false)
+	//		{
+	//			auto pc = Cast<AMithrilDungeonCharacter>(remain);
+	//			if (pc != nullptr)
+	//			{
+	//				pc->ServerRPC_AmountDamage(3* DeltaTime);
+
+	//				//UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Damaged By BlueZone : %s"), *pc->GetActorNameOrLabel()));
+	//			}
+	//		}
+	//	}
+
 	}
 }
 

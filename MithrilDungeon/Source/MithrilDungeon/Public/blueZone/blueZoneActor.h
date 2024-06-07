@@ -31,6 +31,7 @@ public:
 	bool bblueZoneStart = false;
 	bool bPlayer = false;
 
+	FVector SettedScale = FVector::ZeroVector;
 
 	TArray<AActor*> remainPlayers;
 
