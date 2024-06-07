@@ -51,6 +51,7 @@ void ABoss::BeginPlay()
 		Player = *findActor;
 	}
 
+	SpawnDefaultController();
 	aiCon = GetController<AAIController>();
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
@@ -68,7 +69,12 @@ void ABoss::BeginPlay()
 
 		if (equipment)
 		{
-			equipment->OnEquipped();
+			equipment->OnEquippedTarget(combatComponent);
+
+			equipment->GetItemMesh()->SetVisibility(false);
+			equipment->GetItemMesh()->bHiddenInGame = true;
+
+			combatComponent->SetCombatEnabled(true);
 		}
 
 		ABaseWeapon* equipment_Additional = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon_Additional, GetActorTransform(), spawnParam);
@@ -76,6 +82,11 @@ void ABoss::BeginPlay()
 		if (equipment_Additional)
 		{
 			equipment_Additional->OnEquippedTarget(combatComponent_Additional);
+
+			equipment_Additional->GetItemMesh()->SetVisibility(false);
+			equipment_Additional->GetItemMesh()->bHiddenInGame = true;
+
+			combatComponent_Additional->SetCombatEnabled(true);
 		}
 	}
 
@@ -252,9 +263,35 @@ void ABoss::SearchPlayer()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("sug"));
 
-	FVector Start = GetActorLocation();
-	FVector End = Player->GetActorLocation();
-	if (FVector::Distance(Start, End) > 1000)
+	Player = nullptr;
+
+
+	float nearestDist = 9999999.9f;
+
+	// 월드에 있는 플레이어를 찾는다.
+	for (TActorIterator<AMithrilDungeonCharacter> findActor(GetWorld()); findActor; ++findActor)
+	{
+		AMithrilDungeonCharacter* temp = nullptr;
+
+		temp = *findActor;
+
+		FVector Start = GetActorLocation();
+		FVector End = temp->GetActorLocation();
+
+		float dist = FVector::Dist(Start, End);
+
+		if (dist < 1000)
+		{
+			if (nearestDist > dist)
+			{
+				nearestDist = dist;
+
+				Player = *findActor;
+			}
+		}
+	}
+
+	if (Player == nullptr)
 	{
 		enemyState = EBoseState::IDLE;
 	}

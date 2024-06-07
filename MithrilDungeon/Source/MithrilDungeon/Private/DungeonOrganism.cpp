@@ -74,6 +74,8 @@ float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 
 void ADungeonOrganism::ContinueAttack_Implementation()
 {
+	if (combatComponent == nullptr) return;
+
 	combatComponent->bAttacking = false;
 
 	if (combatComponent->bAttackSaved)
@@ -97,6 +99,8 @@ bool ADungeonOrganism::CanReceiveDamage_Implementation()
 
 void ADungeonOrganism::AttackEvent()
 {
+	if(combatComponent == nullptr) return;
+
 	if (motionState == ECharacterMotionState::Idle || motionState == ECharacterMotionState::Attack)
 	{
 		PerformAttack(combatComponent->attackCount, false);

@@ -31,6 +31,9 @@ public:
 	bool bblueZoneStart = false;
 	bool bPlayer = false;
 
+
+	TArray<AActor*> remainPlayers;
+
 	UPROPERTY(EditAnywhere, Category = "Mysettings")
 	class AMithrilDungeonCharacter* Player;
 
