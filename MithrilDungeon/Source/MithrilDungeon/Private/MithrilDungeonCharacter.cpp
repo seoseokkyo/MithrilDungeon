@@ -22,6 +22,7 @@
 #include "DrawDebugHelpers.h" // 디버그라인
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 #include "World/Pickup.h"
+#include "inventory/itemBase.h"
 #include "Inventory/InventoryComponent.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -33,7 +34,7 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-		
+
 	// Don't rotate when the controller rotates. Let that just affect the camera.
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationYaw = false;
@@ -79,11 +80,11 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	inventoryComp->SetupAttachment(RootComponent);
 
 	InteractionCheckFrequecy = 0.1; // 빈도확인
-	InteractionCheckDistance = 225.0f;  
+	InteractionCheckDistance = 225.0f;
 
 	BaseEyeHeight = 74.0f; // 플레이어 눈 높이위로
 
-	
+
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -112,16 +113,16 @@ void AMithrilDungeonCharacter::BeginPlay()
 	{
 		equipment->OnEquipped();
 	}
-	
-	inventoryWidget = Cast<UinventoryWidget>(inventoryComp->GetWidget());
 
-	if (inventoryWidget != nullptr)
-	{
-		inventoryComp->SetWidget(nullptr);
-		inventoryWidget->AddToViewport();
-		inventoryWidget->inventoryOpen();
-		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-	}
+	//inventoryWidget = Cast<UinventoryWidget>(inventoryComp->GetWidget());
+	//
+	//if (inventoryWidget != nullptr)
+	//{
+	//	inventoryComp->SetWidget(nullptr);
+	//	inventoryWidget->AddToViewport();
+	//	inventoryWidget->inventoryOpen();
+	//	inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+	//}
 
 	HUD = Cast<AMithrilDungeonHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 }
@@ -186,14 +187,14 @@ void AMithrilDungeonCharacter::PerformInteractionCheck()
 {
 	InteractionData.LastInteractionCheckTime = GetWorld()->GetTimeSeconds();
 
-	FVector TraceStart {GetPawnViewLocation()}; // 명시적 초기화, 대괄호
-	FVector TraceEnd {TraceStart + (GetViewRotation().Vector() * InteractionCheckDistance)}; // 마우스로 보기로 변경
+	FVector TraceStart{ GetPawnViewLocation() }; // 명시적 초기화, 대괄호
+	FVector TraceEnd{ TraceStart + (GetViewRotation().Vector() * InteractionCheckDistance) }; // 마우스로 보기로 변경
 
 	float LookDirection = FVector::DotProduct(GetActorForwardVector(), GetViewRotation().Vector()); // 내적함수
 
 	if (LookDirection > 0)
 	{
-		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f,0, 2.0f);
+		DrawDebugLine(GetWorld(), TraceStart, TraceEnd, FColor::Red, false, 1.0f, 0, 2.0f);
 
 		FCollisionQueryParams QueryParams;
 		QueryParams.AddIgnoredActor(this);
@@ -203,13 +204,19 @@ void AMithrilDungeonCharacter::PerformInteractionCheck()
 		{
 			if (TraceHit.GetActor()->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 			{
+				auto charCheck = Cast<AMithrilDungeonCharacter>(TraceHit.GetActor());
+				if (charCheck != nullptr && charCheck->bDead)
+				{
+					charCheck->LootByOthers(this);
+				}
+
 				if (TraceHit.GetActor() != InteractionData.CurrentInteractable)
 				{
 					FoundInteractable(TraceHit.GetActor());
 					return;
 				}
 
-				if (TraceHit.GetActor() == InteractionData.CurrentInteractable) 
+				if (TraceHit.GetActor() == InteractionData.CurrentInteractable)
 				{
 					return;
 				}
@@ -224,7 +231,7 @@ void AMithrilDungeonCharacter::FoundInteractable(AActor* NewInteractable)
 {
 	if (IsInteracting()) // 캐릭터가 상호작용하는 경우 호출하고 싶은 기능
 	{
-		 EndInteract();
+		EndInteract();
 	}
 
 	if (InteractionData.CurrentInteractable)// 상호작용 데이터가 있으면 현재 상호작용 가능하다고 알림
@@ -254,7 +261,7 @@ void AMithrilDungeonCharacter::NoInteractableFound()
 		if (IsValid(TargetInteractable.GetObject()))
 		{
 			TargetInteractable->EndFocus();
-		} 
+		}
 
 		HUD->HideInteractionWidget(); // 필요없는 위젯데이터 삭제
 
@@ -277,12 +284,12 @@ void AMithrilDungeonCharacter::BeginInteract()
 
 			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f)) // 허용오차범위 0.1f, 0.2 0.3으로하면 문손잡이 돌릴때느낌으로 약간의 텀을 줄 수 있음.
 			{
-				 Interact();
+				Interact();
 			}
 			else
 			{
 				GetWorld()->GetTimerManager().SetTimer(TimerHandle_Interaction,
-				this, &AMithrilDungeonCharacter::Interact, TargetInteractable->InteractableData.InteractionDuration/*타겟 상호작용 가능*/,false);
+					this, &AMithrilDungeonCharacter::Interact, TargetInteractable->InteractableData.InteractionDuration/*타겟 상호작용 가능*/, false);
 			}
 		}
 	}
@@ -312,6 +319,24 @@ void AMithrilDungeonCharacter::Interact()
 
 }
 
+void AMithrilDungeonCharacter::DieFunction()
+{
+	auto param = GetMesh()->GetCollisionResponseToChannels();
+	param.SetResponse(ECC_Visibility, ECollisionResponse::ECR_Block);
+	
+	GetMesh()->SetCollisionResponseToChannels(param);
+}
+
+void AMithrilDungeonCharacter::LootByOthers(AMithrilDungeonCharacter* otherCharacter)
+{
+	if (motionState != ECharacterMotionState::Die)
+		return;
+
+	auto contents = PlayerInventory->GetInventoryContents();
+
+
+}
+
 void AMithrilDungeonCharacter::UpdateInteractionWidget() const
 {
 	if (IsValid(TargetInteractable.GetObject()))
@@ -338,9 +363,9 @@ void AMithrilDungeonCharacter::DropItem(UItemBase* ItemToDrop, const int32 Quant
 		SpawnParams.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AdjustIfPossibleButAlwaysSpawn;
 
 		// 캐릭터 50앞방향에서 생성됨
-		const FVector SpawnLocation{GetActorLocation() + (GetActorForwardVector() * 50.0f)};
+		const FVector SpawnLocation{ GetActorLocation() + (GetActorForwardVector() * 50.0f) };
 
-		const FTransform SpawnTransform (GetActorRotation(), SpawnLocation);
+		const FTransform SpawnTransform(GetActorRotation(), SpawnLocation);
 
 		// 수량제거
 		const int32 RemoveQuantity = PlayerInventory->RemoveAmountOfItem(ItemToDrop, QuantityToDrop);
@@ -351,7 +376,7 @@ void AMithrilDungeonCharacter::DropItem(UItemBase* ItemToDrop, const int32 Quant
 	}
 	else
 	{
-		UE_LOG(LogTemp,Warning, TEXT("Item to drop was Some how null"));
+		UE_LOG(LogTemp, Warning, TEXT("Item to drop was Some how null"));
 	}
 }
 
@@ -362,7 +387,7 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 {
 	// Set up action bindings
 	if (UEnhancedInputComponent* EnhancedInputComponent = Cast<UEnhancedInputComponent>(PlayerInputComponent)) {
-		
+
 		// Jumping
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::CharacterJump);
 		EnhancedInputComponent->BindAction(JumpAction, ETriggerEvent::Completed, this, &ACharacter::StopJumping);
@@ -380,11 +405,11 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		// 인벤토리 열고닫기
 		EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::ToggleMenu);
 		/*EnhancedInputComponent->BindAction(InventoryAction, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::InventoryOnOff);*/
-		
+
 
 		// 물체 상호작용
 		EnhancedInputComponent->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::BeginInteract);
-		
+
 
 		EnhancedInputComponent->BindAction(IA_Released, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::EndInteract);
 	}
@@ -419,7 +444,7 @@ void AMithrilDungeonCharacter::Move(const FInputActionValue& Value)
 
 		// get forward vector
 		const FVector ForwardDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-	
+
 		// get right vector 
 		const FVector RightDirection = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
 
@@ -475,25 +500,25 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 
 void AMithrilDungeonCharacter::InventoryOnOff(const FInputActionValue& Value)
 {
-	// 인벤토리 온으로 변경
-	if (!bInventorystate)
-	{
-		if (inventoryWidget != nullptr)
-		{
-			inventoryWidget->SetVisibility(ESlateVisibility::Visible);
-			bInventorystate = true;
-		}
-	}
-
-	// 인벤토리 오프로 변경
-	else
-	{
-		if (inventoryWidget != nullptr)
-		{ 
-			inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-			bInventorystate = false;
-		}
-	}
+	//// 인벤토리 온으로 변경
+	//if (!bInventorystate)
+	//{
+	//	if (inventoryWidget != nullptr)
+	//	{
+	//		inventoryWidget->SetVisibility(ESlateVisibility::Visible);
+	//		bInventorystate = true;
+	//	}
+	//}
+	//
+	//// 인벤토리 오프로 변경
+	//else
+	//{
+	//	if (inventoryWidget != nullptr)
+	//	{
+	//		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
+	//		bInventorystate = false;
+	//	}
+	//}
 
 }
 
@@ -501,7 +526,7 @@ void AMithrilDungeonCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	
+
 	if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequecy)
 	{
 		PerformInteractionCheck();

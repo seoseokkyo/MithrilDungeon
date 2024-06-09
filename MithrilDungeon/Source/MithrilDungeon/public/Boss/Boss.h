@@ -57,6 +57,11 @@ public:
 
 	void SearchPlayer();
 
+	virtual void DieFunction() override;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_DieFunction();
+
 	void PrintInfo();
 
 	bool bOnAttackDelay = false;

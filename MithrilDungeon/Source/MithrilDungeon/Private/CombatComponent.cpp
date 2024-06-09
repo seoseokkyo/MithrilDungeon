@@ -6,6 +6,7 @@
 #include <GameFramework/Character.h>
 #include "AnimInstance_Interface.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 // Sets default values for this component's properties
 UCombatComponent::UCombatComponent()
@@ -15,7 +16,8 @@ UCombatComponent::UCombatComponent()
 	PrimaryComponentTick.bCanEverTick = true;
 
 	// ...
-	SetIsReplicated(true);
+
+
 
 	ComponentTags.Add(TEXT("CombatComp"));
 }
@@ -27,7 +29,19 @@ void UCombatComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
+		UE_LOG(LogTemp, Warning, TEXT("CombatComp GetIsReplicated() : %s"), GetIsReplicated() ? TEXT("TRUE") : TEXT("FALSE"));
+	if (GetIsReplicated() != true)
+	{
 
+		SetIsReplicated(true);
+	}	
+
+		UE_LOG(LogTemp, Warning, TEXT("CombatComp GetIsReplicated() : %s"), GetIsReplicated() ? TEXT("TRUE") : TEXT("FALSE"));
+	if (GetIsReplicated() != true)
+	{
+
+		SetIsReplicated(true);
+	}
 }
 
 

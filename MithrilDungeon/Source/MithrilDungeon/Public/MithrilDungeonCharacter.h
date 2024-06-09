@@ -102,7 +102,7 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = TPS)
 	class UWidgetComponent* inventoryComp;
 
-	class UinventoryWidget* inventoryWidget;
+	//class UinventoryWidget* inventoryWidget;
 
 	// 진원 S
 	FORCEINLINE bool IsInteracting() const {return GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_Interaction); }; // 현재 상호작용중인지 아닌지
@@ -188,5 +188,9 @@ public:
 
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_ToggleCombat();
+
+	virtual void DieFunction() override;
+
+	void LootByOthers(AMithrilDungeonCharacter* otherCharacter);
 };
 

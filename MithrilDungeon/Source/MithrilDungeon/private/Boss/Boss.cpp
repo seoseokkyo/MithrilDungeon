@@ -209,7 +209,14 @@ void ABoss::Attack()
 
 void ABoss::AttackDelay()
 {
-	aiCon->StopMovement();
+	if (aiCon)
+	{		
+		SpawnDefaultController();
+
+		aiCon = GetController<AAIController>();
+
+		aiCon->StopMovement();
+	}
 
 	FTimerHandle AttackTimer;
 	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [&]() {
@@ -298,6 +305,31 @@ void ABoss::SearchPlayer()
 	{
 		enemyState = EEnemyState::MOVE;
 	}
+}
+
+void ABoss::DieFunction()
+{
+	GetMesh()->GetAnimInstance()->StopAllMontages(0.2);
+
+	Super::DieFunction();
+
+	ServerRPC_DieFunction();
+}
+
+void ABoss::ServerRPC_DieFunction_Implementation()
+{
+	enemyState = EEnemyState::DIE;
+
+	aiCon->SetFocus(nullptr);
+
+	FTimerHandle hnd;
+	GetWorldTimerManager().SetTimer(hnd, [&]() {
+
+		EnableRagdoll();
+
+		}, 2.0f, false);
+
+	//NetMulticastRPC_DieFunction();
 }
 
 void ABoss::PrintInfo()

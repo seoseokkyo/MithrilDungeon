@@ -5,6 +5,7 @@
 #include "DungeonOrganism.h"
 #include "MithrilDungeonGameInstance.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 // Sets default values for this component's properties
 UStateComponent::UStateComponent()
@@ -15,7 +16,7 @@ UStateComponent::UStateComponent()
 
 	// ...
 
-	SetIsReplicated(true);
+
 }
 
 
@@ -26,6 +27,20 @@ void UStateComponent::BeginPlay()
 
 
 	character = GetOwner<ADungeonOrganism>();
+
+		UE_LOG(LogTemp, Warning, TEXT("StateComp GetIsReplicated() : %s"), GetIsReplicated() ? TEXT("TRUE") : TEXT("FALSE"));
+	if (GetIsReplicated() != true)
+	{
+
+		SetIsReplicated(true);
+	}
+
+		UE_LOG(LogTemp, Warning, TEXT("StateComp GetIsReplicated() : %s"), GetIsReplicated() ? TEXT("TRUE") : TEXT("FALSE"));
+	if (GetIsReplicated() != true)
+	{
+
+		SetIsReplicated(true);
+	}
 	// ...
 }
 
