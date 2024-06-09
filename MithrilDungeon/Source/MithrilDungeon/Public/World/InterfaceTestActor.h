@@ -7,6 +7,9 @@
 #include "Interfaces/InteractionInterface.h"
 #include "InterfaceTestActor.generated.h"
 
+class UWidgetComponent;
+class UportalBarWidget;
+
 UCLASS()
 class MITHRILDUNGEON_API AInterfaceTestActor : public AActor, public IInteractionInterface // 인터페이스 상속
 {
@@ -16,6 +19,21 @@ public:
 	AInterfaceTestActor();
 
 	virtual void Tick(float DeltaTime) override;
+
+	class UInteractionWidget* InteractionWidget;
+
+	UPROPERTY(EditAnywhere, Category = "Portal")
+	TSubclassOf<class AportalActor> portalActorclass;
+	
+
+	bool bportalOnOff = false;
+	float bportalTime = 0.0f;
+
+	UPROPERTY(EditAnywhere, Category = "Portal")
+	UWidgetComponent* portalBarWidgetComp;
+
+	UPROPERTY(EditAnywhere, Category = "Portal")
+	UportalBarWidget* portalBarWidget;
 
 protected:
 	virtual void BeginPlay() override;
@@ -33,5 +51,6 @@ protected:
 	virtual void BeginInteract() override;
 	virtual void EndInteract() override;
 	virtual void Interact(AMithrilDungeonCharacter* PlayerCharacter) override;
+
 
 };

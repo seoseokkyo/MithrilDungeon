@@ -23,6 +23,8 @@
 #include <../../../../../../../Source/Runtime/Core/Public/Math/UnrealMathUtility.h>
 #include "World/Pickup.h"
 #include "Inventory/InventoryComponent.h"
+#include "World/InterfaceTestActor.h"
+
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -124,6 +126,8 @@ void AMithrilDungeonCharacter::BeginPlay()
 	}
 
 	HUD = Cast<AMithrilDungeonHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+
+	InterfaceActor = Cast<AInterfaceTestActor>(InterfaceActor);
 }
 
 void AMithrilDungeonCharacter::ServerRPC_ToggleCombat_Implementation()
@@ -294,13 +298,14 @@ void AMithrilDungeonCharacter::BeginInteract()
 // 우리가 상호작용 하고있는지 확인필요 x
 void AMithrilDungeonCharacter::EndInteract()
 {
+
 	GetWorld()->GetTimerManager().ClearTimer(TimerHandle_Interaction); // 타이머 초기화.
 
 	if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
 	{
 		TargetInteractable->EndInteract();// 이제 대상 상호작용 가능, 대상 상호작용 종료
 	}
-
+	
 }
 
 
@@ -389,7 +394,7 @@ void AMithrilDungeonCharacter::SetupPlayerInputComponent(UInputComponent* Player
 		EnhancedInputComponent->BindAction(IA_Pressed, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::BeginInteract);
 		
 
-		EnhancedInputComponent->BindAction(IA_Released, ETriggerEvent::Started, this, &AMithrilDungeonCharacter::EndInteract);
+		EnhancedInputComponent->BindAction(IA_Pressed, ETriggerEvent::Completed, this, &AMithrilDungeonCharacter::EndInteract);
 	}
 	else
 	{

@@ -45,6 +45,7 @@ void UInteractionWidget::UpdateWidget(const FInteractableData& InteractableData)
 		break;
 
 	case EInteractableType::Device:
+		//InteractionProgressBar->SetVisibility(ESlateVisibility::Visible);
 		break;
 
 	case EInteractableType::Toggle:

@@ -17,16 +17,10 @@ public:
 	virtual void Tick(float DeltaTime) override;
 
 	UPROPERTY(EditDefaultsOnly)
-	class UStaticMeshComponent* meshComp;
-
-	UPROPERTY(EditDefaultsOnly)
 	class UStaticMeshComponent* portalComp;
 
-	UPROPERTY(EditDefaultsOnly)
-	class USphereComponent* SphereComp;
 
-
-	void portalCreate();
+	
 
 	UFUNCTION()
 	void BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult);
