@@ -201,6 +201,8 @@ void ADungeonOrganism::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ADungeonOrganism, combatComponent);
 	DOREPLIFETIME(ADungeonOrganism, motionState);
 	DOREPLIFETIME(ADungeonOrganism, bDead);
+	DOREPLIFETIME(ADungeonOrganism, itemRandNums);
+	DOREPLIFETIME(ADungeonOrganism, randItemIndex);
 
 }
 
@@ -270,11 +272,10 @@ void ADungeonOrganism::DieFunction()
 
 void ADungeonOrganism::LootByOthers(ADungeonOrganism* otherCharacter)
 {
-	if (motionState != ECharacterMotionState::Die)
-		return;
+	//if (motionState != ECharacterMotionState::Die)
+	//	return;
 
 	//otherCharacter->GetController();
-
 
 	auto panel = Cast<UInventoryPanel>(lootPanelWidget->GetWidgetFromName(FName(TEXT("WBP_InventoryPanel"))));
 
@@ -298,26 +299,61 @@ void ADungeonOrganism::CreateInventory()
 
 void ADungeonOrganism::InitRandomItem()
 {
-	FActorSpawnParameters spawnParam;
-	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+	itemRandNums = FMath::RandRange(0, 10);
 
-	int32 randNums = FMath::RandRange(0, 10);
+	ServerRPC_SetItemRandNums(itemRandNums);
 
-	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Init randNums : %d"), randNums));
-
-	for (int i = 0; i < randNums; i++)
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Init randNums : %d"), itemRandNums));
+	for (int i = 0; i < itemRandNums; i++)
 	{
-		auto pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(), FTransform(), spawnParam);
+		randItemIndex = FMath::RandRange(1, 6);
 
-		int32 randItemIndex = FMath::RandRange(1, 6);
+		ServerRPC_SetItemRandIndex(randItemIndex);
 
 		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Add Item : test_%03d"), randItemIndex));
 
-		FString strName = FString::Printf(TEXT("test_%03d"), randItemIndex);
-		pickup->DesiredItemID = FName(*strName);
-
-		pickup->SetInput(this);
+		ServerRPC_SpawnItem(randItemIndex);
 	}
 
 	PlayerInventory->RefreshInventory();
+}
+
+void ADungeonOrganism::ServerRPC_SetItemRandNums_Implementation(int32 randNums)
+{
+	itemRandNums = randNums;
+
+	NetMulticastRPC_SetItemRandNums(randNums);
+}
+
+void ADungeonOrganism::NetMulticastRPC_SetItemRandNums_Implementation(int32 randNums)
+{
+	itemRandNums = randNums;
+}
+
+void ADungeonOrganism::ServerRPC_SetItemRandIndex_Implementation(int32 randIndex)
+{
+	randItemIndex = randIndex;
+
+	NetMulticastRPC_SetItemRandIndex(randIndex);
+}
+
+void ADungeonOrganism::NetMulticastRPC_SetItemRandIndex_Implementation(int32 randIndex)
+{
+	randItemIndex = randIndex;
+}
+
+void ADungeonOrganism::ServerRPC_SpawnItem_Implementation(int32 itemIndex)
+{
+	NetMulticastRPC_SpawnItem(itemIndex);
+}
+
+void ADungeonOrganism::NetMulticastRPC_SpawnItem_Implementation(int32 randIndex)
+{
+	FActorSpawnParameters spawnParam;
+	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	auto pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(), FTransform(), spawnParam);
+	FString strName = FString::Printf(TEXT("test_%03d"), randItemIndex);
+	pickup->DesiredItemID = FName(*strName);
+	pickup->SetInput(this);
 }

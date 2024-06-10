@@ -121,6 +121,11 @@ void AMithrilDungeonCharacter::BeginPlay()
 
 	InterfaceActor = Cast<AInterfaceTestActor>(InterfaceActor);
 
+	if (IsLocallyControlled())
+	{
+		InitRandomItem();
+	}
+
 	//PlayerInventory->HandleAddItem();
 }
 

@@ -133,4 +133,29 @@ public:
 	virtual void CreateInventory();
 
 	void InitRandomItem();
+
+
+	UPROPERTY(Replicated)
+	int32 itemRandNums = 0;
+
+	UPROPERTY(Replicated)
+	int32 randItemIndex = 0;
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetItemRandNums(int32 randNums);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SetItemRandNums(int32 randNums);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SetItemRandIndex(int32 randIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SetItemRandIndex(int32 randIndex);
+
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_SpawnItem(int32 itemIndex);
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_SpawnItem(int32 randIndex);
 };

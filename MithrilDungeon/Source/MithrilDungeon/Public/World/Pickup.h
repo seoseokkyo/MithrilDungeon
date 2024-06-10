@@ -79,5 +79,4 @@ public:
 	FName DesiredItemID;
 
 	void SetInput(const ADungeonOrganism* Taker);
-	
 };

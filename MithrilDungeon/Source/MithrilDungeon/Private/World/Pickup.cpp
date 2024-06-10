@@ -24,9 +24,7 @@ void APickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	InitializePickup(UItemBase::StaticClass(), ItemQuantity); // 수량설정
-
-
+	//InitializePickup(UItemBase::StaticClass(), ItemQuantity); // 수량설정
 }
 
 
@@ -42,7 +40,10 @@ void APickup::InitializePickup(const TSubclassOf<UItemBase> BaseClass, const int
 	{
 		const FItemData* ItemData = ItemDataTable->FindRow<FItemData>(DesiredItemID, DesiredItemID.ToString());
 
-		ItemReference = NewObject<UItemBase>(this, BaseClass); // 항목을 성공적으로 가져오고 초기화 할 새 항목참조생성
+		if (ItemReference == nullptr)
+		{
+			ItemReference = NewObject<UItemBase>(this, BaseClass); // 항목을 성공적으로 가져오고 초기화 할 새 항목참조생성
+		}
 
 		// 새 항목 데이터 테이블 행의 항목으로 내부 픽업 항목 참조를 초기화
 		ItemReference->ID = ItemData->ID;
@@ -177,6 +178,18 @@ void APickup::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 
 void APickup::SetInput(const ADungeonOrganism* Taker)
 {
-	TakePickup(Taker);
-}
+	if (ItemDataTable)
+	{
+		InitializePickup(UItemBase::StaticClass(), ItemQuantity);
+		TakePickup(Taker);
 
+		//if (const FItemData* ItemData = ItemDataTable->FindRow<FItemData>(DesiredItemID, DesiredItemID.ToString())) // 유효한 행을 얻으면 즉시 최적화
+		//{
+		//	PickupMesh->SetStaticMesh(ItemData->AssetData.Mesh); // 픽업메시를 데이터메시로 설정
+
+		//	ItemQuantity = (ItemQuantity == 0) ? 1 : ItemQuantity;
+
+
+		//}
+	}
+}
