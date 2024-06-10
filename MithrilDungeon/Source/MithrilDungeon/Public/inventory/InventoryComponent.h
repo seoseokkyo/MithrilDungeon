@@ -137,6 +137,8 @@ public:
 	UFUNCTION(Category = "Inventory")
 	FORCEINLINE void SetWeightCapacity(const float NewWeightCapacity) { InventoryWeightCapacity = NewWeightCapacity; };
 
+	void RefreshInventory();
+
 protected:
 	
 
@@ -152,7 +154,7 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Inventory")
 	float InventoryWeightCapacity;
 
-	UPROPERTY(VisibleAnywhere, Category = "Inventory")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Inventory")
 	TArray<TObjectPtr<UItemBase>> InventoryContents; // 많은 내부 포인터를 t개체 포인터로 대체
 
 	//================================================================================
@@ -168,4 +170,6 @@ protected:
 
 	void AddNewItem(UItemBase* Item, const int32 AmountToAdd);// 새항목추가
 	
+
+
 };

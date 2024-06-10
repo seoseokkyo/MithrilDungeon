@@ -10,11 +10,15 @@
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
+#include "LootPanel.h"
+#include "inventory/InventoryComponent.h"
+#include "Interfaces/InventoryPanel.h"
+#include "World/Pickup.h"
 
 // Sets default values
 ADungeonOrganism::ADungeonOrganism()
 {
- 	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
+	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
 	stateComp = CreateDefaultSubobject<UStateComponent>(TEXT("StateComp"));
@@ -22,13 +26,16 @@ ADungeonOrganism::ADungeonOrganism()
 	combatComponent = CreateDefaultSubobject<UCombatComponent>(TEXT("CombatComp"));
 
 	characterName = TEXT("Default");
+
+	CreateInventory();
+
 }
 
 // Called when the game starts or when spawned
 void ADungeonOrganism::BeginPlay()
 {
 	Super::BeginPlay();
-		
+
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("characterName : %s"), *characterName));
 
 	stateComp->InitStat();
@@ -99,14 +106,14 @@ bool ADungeonOrganism::CanReceiveDamage_Implementation()
 
 void ADungeonOrganism::AttackEvent()
 {
-	if(combatComponent == nullptr) return;
+	if (combatComponent == nullptr) return;
 
 	if (motionState == ECharacterMotionState::Idle || motionState == ECharacterMotionState::Attack)
 	{
 		PerformAttack(combatComponent->attackCount, false);
-	}	
+	}
 
-	
+
 }
 
 void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
@@ -194,7 +201,7 @@ void ADungeonOrganism::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& Out
 	DOREPLIFETIME(ADungeonOrganism, combatComponent);
 	DOREPLIFETIME(ADungeonOrganism, motionState);
 	DOREPLIFETIME(ADungeonOrganism, bDead);
-	
+
 }
 
 void ADungeonOrganism::ServerRPC_PerformAttack_Implementation(UAnimMontage* useMontage)
@@ -259,4 +266,58 @@ void ADungeonOrganism::DieFunction()
 
 	bDead = true;
 
+}
+
+void ADungeonOrganism::LootByOthers(ADungeonOrganism* otherCharacter)
+{
+	if (motionState != ECharacterMotionState::Die)
+		return;
+
+	//otherCharacter->GetController();
+
+
+	auto panel = Cast<UInventoryPanel>(lootPanelWidget->GetWidgetFromName(FName(TEXT("WBP_InventoryPanel"))));
+
+	if (panel)
+	{
+		panel->SetTargetCharacter(this);
+		lootPanelWidget->AddToViewport();
+	}
+}
+
+void ADungeonOrganism::CreateInventory()
+{
+	if (PlayerInventory == nullptr)
+	{
+		PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	}
+
+	PlayerInventory->SetSlotsCapacity(20); //인벤토리 슬롯 20개생성
+	PlayerInventory->SetWeightCapacity(50.0f); // 무게용량 50설정
+}
+
+void ADungeonOrganism::InitRandomItem()
+{
+	FActorSpawnParameters spawnParam;
+	spawnParam.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+
+	int32 randNums = FMath::RandRange(0, 10);
+
+	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Init randNums : %d"), randNums));
+
+	for (int i = 0; i < randNums; i++)
+	{
+		auto pickup = GetWorld()->SpawnActor<APickup>(APickup::StaticClass(), FTransform(), spawnParam);
+
+		int32 randItemIndex = FMath::RandRange(1, 6);
+
+		UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("Add Item : test_%03d"), randItemIndex));
+
+		FString strName = FString::Printf(TEXT("test_%03d"), randItemIndex);
+		pickup->DesiredItemID = FName(*strName);
+
+		pickup->SetInput(this);
+	}
+
+	PlayerInventory->RefreshInventory();
 }

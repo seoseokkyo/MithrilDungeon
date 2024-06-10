@@ -20,7 +20,20 @@ void UInventoryComponent::BeginPlay()
 	Super::BeginPlay();
 
 	// ...
-	
+		// ...
+	UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent GetIsReplicated() : %s"), GetIsReplicated() ? TEXT("TRUE") : TEXT("FALSE"));
+	if (GetIsReplicated() != true)
+	{
+
+		SetIsReplicated(true);
+	}
+
+	UE_LOG(LogTemp, Warning, TEXT("UInventoryComponent GetIsReplicated() : %s"), GetIsReplicated() ? TEXT("TRUE") : TEXT("FALSE"));
+	if (GetIsReplicated() != true)
+	{
+
+		SetIsReplicated(true);
+	}
 }
 
 
@@ -58,12 +71,12 @@ UItemBase* UInventoryComponent::FindNextItemByID(UItemBase* ItemIn) const
 UItemBase* UInventoryComponent::FindNextPartialStack(UItemBase* ItemIn) const
 {
 	if (const TArray<TObjectPtr<UItemBase>>::ElementType* Result = InventoryContents.FindByPredicate([&ItemIn] // 이중포인터
-	(const UItemBase* InventoryItem) 
+	(const UItemBase* InventoryItem)
 		{
 
 			return InventoryItem->ID == ItemIn->ID && !InventoryItem->IsFullItemStack(); // ID가 같고 풀로차있지않은지
 		}
-		))
+	))
 	{
 		return *Result;
 	}
@@ -101,9 +114,9 @@ int32 UInventoryComponent::RemoveAmountOfItem(UItemBase* ItemIn, int32 DesiredAm
 	ItemIn->SetQuantity(ItemIn->Quantity - ActualAmountToRemove); // 수량설정, 항목을 수량으로표시, 제거할 실제양을 뺀 다음 원하는 양을 제거해서 무게조정
 
 	InventoryTotalWeight -= ActualAmountToRemove * ItemIn->GetItemSingleWeight();
-	
+
 	OnInventoryUpdated.Broadcast();// 업데이트하고 
-	 
+
 	return ActualAmountToRemove; // 실제로 제거한 양 반환
 }
 
@@ -116,6 +129,11 @@ void UInventoryComponent::SplitExistingStack(UItemBase* ItemIn, const int32 Amou
 	}
 }
 
+void UInventoryComponent::RefreshInventory()
+{
+	OnInventoryUpdated.Broadcast();
+}
+
 FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem)
 {
 	// 유효한 가중치가 있는지 확인, 용량이없을경우
@@ -123,7 +141,7 @@ FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem
 	{
 		return FItemAddResult::AddedNone(FText::Format(FText::FromString("Could not add {0} to the inventory. Item has invalid weight value."), InputItem->TextData.Name)); // 추가하지않음
 	}
-	
+
 	// will the item weight overflow weight capacity 추가하면 용량초과
 	if (InventoryTotalWeight + InputItem->GetItemSingleWeight() > GetWeightCapacity())
 	{
@@ -139,7 +157,7 @@ FItemAddResult UInventoryComponent::HandleNonStackableItems(UItemBase* InputItem
 	// 다 통과했으면 성공
 	AddNewItem(InputItem, 1);
 
-	return FItemAddResult::AddedAll(1,FText::Format(FText::FromString("Successfully added a single {0} to the inventory."), InputItem->TextData.Name));
+	return FItemAddResult::AddedAll(1, FText::Format(FText::FromString("Successfully added a single {0} to the inventory."), InputItem->TextData.Name));
 }
 
 int32 UInventoryComponent::HandleStackableItems(UItemBase* ItemIn, int32 RequestedAddAmount)
@@ -157,7 +175,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* InputItem)
 		{
 			return HandleNonStackableItems(InputItem);
 		}
-	
+
 		// handle stakckable 값 추가
 		const int32 StackableAmountAdded = HandleStackableItems(InputItem, InitialRequestedAddAmount);
 
@@ -168,7 +186,7 @@ FItemAddResult UInventoryComponent::HandleAddItem(UItemBase* InputItem)
 
 		if (StackableAmountAdded < InitialRequestedAddAmount && StackableAmountAdded > 0)
 		{
-			return FItemAddResult::AddedPartial(StackableAmountAdded, FText::Format(FText::FromString("Partial amount of {0} added to the inventory. Number added = {1}"),InputItem->TextData.Name, StackableAmountAdded));
+			return FItemAddResult::AddedPartial(StackableAmountAdded, FText::Format(FText::FromString("Partial amount of {0} added to the inventory. Number added = {1}"), InputItem->TextData.Name, StackableAmountAdded));
 		}
 
 		if (StackableAmountAdded <= 0) // 추가된 값이 0보다 작으면 안되지만
@@ -198,7 +216,7 @@ void UInventoryComponent::AddNewItem(UItemBase* Item, const int32 AmountToAdd)
 	}
 
 	NewItem->OwningInventory = this; // 인벤토리에 아이템을 집어넣음
-	NewItem-> SetQuantity(AmountToAdd);	// 추가할 수량설정
+	NewItem->SetQuantity(AmountToAdd);	// 추가할 수량설정
 
 	InventoryContents.Add(NewItem);	// 새 항목 추가
 	InventoryTotalWeight += NewItem->GetItemStackWeight();// 가중치 조정

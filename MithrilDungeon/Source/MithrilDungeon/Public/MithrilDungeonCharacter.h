@@ -101,7 +101,6 @@ public:
 	// 진원 S
 	FORCEINLINE bool IsInteracting() const {return GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_Interaction); }; // 현재 상호작용중인지 아닌지
 
-	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }; // 인벤토리 가져오기
 
 	void UpdateInteractionWidget() const;
 
@@ -142,11 +141,9 @@ protected:
 	virtual void BeginPlay();
 
 	// 진원 s
-	UPROPERTY(VisibleAnywhere, Category = "Character | Interaction")
+	UPROPERTY(Replicated, VisibleAnywhere, Category = "Character | Interaction")
 	TScriptInterface<IInteractionInterface> TargetInteractable;
 
-	UPROPERTY(VisibleAnywhere, Category = "Character | Inventory")
-	UInventoryComponent* PlayerInventory;
 
 	float InteractionCheckFrequecy;
 
@@ -154,6 +151,7 @@ protected:
 
 	FTimerHandle TimerHandle_Interaction; 
 
+	UPROPERTY(Replicated)
 	FInteractionData InteractionData;
 
 	void ToggleMenu();
@@ -165,10 +163,22 @@ protected:
 	void NoInteractableFound();// 하지만 찾지못하면 호출X
 	void BeginInteract();
 	void EndInteract();
-	void Interact();
 	// 진원 e
 		
+	UFUNCTION(Server, Reliable)
+	void ServerRPC_Interact();
+
+
+	UFUNCTION(NetMulticast, Reliable)
+	void NetMulticastRPC_Interact(const TScriptInterface<IInteractionInterface>& Interactable);
+
+	ADungeonOrganism* focusedChar = nullptr;
+
+	AMithrilDungeonCharacter* self = this;
+
 public:
+
+	void Interact();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "weapon")
 	TSubclassOf<class ABaseWeapon> defaultWeapon;
@@ -186,6 +196,9 @@ public:
 
 	virtual void DieFunction() override;
 
-	void LootByOthers(AMithrilDungeonCharacter* otherCharacter);
+
+	virtual void CreateInventory() override;
+
+	virtual void GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const override;
 };
 

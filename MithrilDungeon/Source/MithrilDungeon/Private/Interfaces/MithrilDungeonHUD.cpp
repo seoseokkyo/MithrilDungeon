@@ -3,6 +3,7 @@
 #include "Interfaces/MithrilDungeonHUD.h"
 #include "Interfaces/MainMenuWidget.h"
 #include "Interfaces/InteractionWidget.h"
+#include "LootPanel.h"
 
 AMithrilDungeonHUD::AMithrilDungeonHUD()
 {
@@ -26,7 +27,6 @@ void AMithrilDungeonHUD::BeginPlay()
 		InteractionWidget->AddToViewport(-1);
 		InteractionWidget->SetVisibility(ESlateVisibility::Collapsed);
 	}
-
 }
 
 void AMithrilDungeonHUD::DisplayMenu()

@@ -9,6 +9,7 @@
 
 class UDataTable;
 class UItemBase;
+class ADungeonOrganism;
 
 UCLASS()
 class MITHRILDUNGEON_API APickup : public AActor, public IInteractionInterface
@@ -46,8 +47,6 @@ protected:
 	UPROPERTY(EditInstanceOnly, Category = "Pickup | Item Initialization")
 	UDataTable* ItemDataTable;
 
-	UPROPERTY(EditInstanceOnly, Category = "Pickup | Item Initialization")
-	FName DesiredItemID;
 
 	UPROPERTY(VisibleAnywhere, Category = "Pickup | Item Reference")
 	UItemBase* ItemReference; // 픽업이 가리키는 항목
@@ -68,9 +67,17 @@ protected:
 	virtual void Interact(AMithrilDungeonCharacter* PlayerCharacter) override;
 	void UpdateInteractableData();
 
-	void TakePickup(const AMithrilDungeonCharacter* Taker); // 캐릭터의 인벤토리와 인터페이스해야함
+	void TakePickup(const ADungeonOrganism* Taker); // 캐릭터의 인벤토리와 인터페이스해야함
 
 #if WITH_EDITOR // 매크로
 	virtual void PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent) override;
 #endif
+
+public:
+
+	UPROPERTY(EditInstanceOnly, Category = "Pickup | Item Initialization")
+	FName DesiredItemID;
+
+	void SetInput(const ADungeonOrganism* Taker);
+	
 };

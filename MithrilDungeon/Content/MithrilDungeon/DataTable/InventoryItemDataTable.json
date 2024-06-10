@@ -1,0 +1,64 @@
+[
+	{
+		"Name": "test_001",
+		"ID": "test_001",
+		"ItemType": "Expendable",
+		"ItemQuality": "Common",
+		"ItemStatistics":
+		{
+			"ArmorRating": 0,
+			"DamageValue": 0,
+			"RestorationAmount": 30,
+			"SellValue": 50
+		},
+		"TextData":
+		{
+			"Name": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"DCF173C749AC70395C61B993B60ECEC0\", \"regeneration Potion\")",
+			"Description": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"F267511E46B6A64D113A03B21C5E6B1D\", \"A simple health restoration potion. Heals 30 HP\")",
+			"InteractionText": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"56113B25479C3ADFF8D287BD2EF6951E\", \"pick up\")",
+			"UsageText": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"2A4EFD394E984EC88D4F04B20B3C135F\", \"drink\")"
+		},
+		"NumericData":
+		{
+			"Weight": 2.3,
+			"MaxStackSize": 5,
+			"bisStackable": false
+		},
+		"AssetData":
+		{
+			"Icon": "/Script/Engine.Texture2D'/Game/Infinity_Blade_Assets/Textures/PotionIcons.PotionIcons'",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/Infinity_Blade_Assets/Meshes/Props/PotionRegen.PotionRegen'"
+		}
+	},
+	{
+		"Name": "test_002",
+		"ID": "test_002",
+		"ItemType": "Expendable",
+		"ItemQuality": "Grandmaster",
+		"ItemStatistics":
+		{
+			"ArmorRating": 0,
+			"DamageValue": 0,
+			"RestorationAmount": 30,
+			"SellValue": 50
+		},
+		"TextData":
+		{
+			"Name": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"31AEB26042C8F6844037259BD6104802\", \"key\")",
+			"Description": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"6FC4AEB3466E3EB9644BF39EA6512F81\", \"door open\")",
+			"InteractionText": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"EDCC24024EEF11CE2005BCB95A530B64\", \"pick up\")",
+			"UsageText": "NSLOCTEXT(\"[5BFB2D97BCC99A107A05CC3C851A5D85]\", \"BB955D2C4729BEDBDEFB039DD476C545\", \"rock open\")"
+		},
+		"NumericData":
+		{
+			"Weight": 4.6,
+			"MaxStackSize": 0,
+			"bisStackable": false
+		},
+		"AssetData":
+		{
+			"Icon": "/Script/Engine.Texture2D'/Game/Enemy/ItemData/keyIcon.keyIcon'",
+			"Mesh": "/Script/Engine.StaticMesh'/Game/MedievalDungeon/Meshes/Props/SM_Lock_Key.SM_Lock_Key'"
+		}
+	}
+]

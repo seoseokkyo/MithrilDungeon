@@ -3,7 +3,6 @@
 
 #include "inventory/itemDragDropOperation.h"
 #include "Blueprint/WidgetBlueprintLibrary.h"
-#include "inventory/inventoryWidget.h"
 
 
 

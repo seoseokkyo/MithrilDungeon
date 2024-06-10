@@ -6,6 +6,7 @@
 #include "GameFramework/Character.h"
 #include "CombatInterface.h"
 #include "StateComponent.h"
+#include "inventory/InventoryComponent.h"
 #include "DungeonOrganism.generated.h"
 
 UENUM()
@@ -29,6 +30,7 @@ enum class ECharacterMotionState : int8
 
 class UAnimMontage;
 class UCombatComponent;
+class ULootPanel;
 
 UCLASS()
 class MITHRILDUNGEON_API ADungeonOrganism : public ACharacter, public ICombatInterface
@@ -75,6 +77,10 @@ public:
 	UPROPERTY(Replicated, BlueprintReadWrite)
 	ECharacterMotionState motionState = ECharacterMotionState::Idle;
 
+	
+	UPROPERTY(VisibleAnywhere, Category = "Character | Inventory")
+	UInventoryComponent* PlayerInventory;
+
 	virtual void ContinueAttack_Implementation() override;
 	virtual void ResetCombat_Implementation() override;
 	virtual bool CanReceiveDamage_Implementation() override;
@@ -111,4 +117,20 @@ public:
 
 	UFUNCTION()
 	virtual void DieFunction();
+
+
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Widgets")
+	TSubclassOf<ULootPanel> lootPanelWidgetClass;
+		
+	UPROPERTY()
+	ULootPanel* lootPanelWidget;	 
+
+	FORCEINLINE UInventoryComponent* GetInventory() const { return PlayerInventory; }; // 인벤토리 가져오기
+
+	void LootByOthers(ADungeonOrganism* otherCharacter);
+
+	virtual void CreateInventory();
+
+	void InitRandomItem();
 };

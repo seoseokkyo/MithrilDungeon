@@ -7,7 +7,7 @@
 #include "InventoryPanel.generated.h"
 
 class UInventoryComponent;
-class AMithrilDungeonCharacter;
+class ADungeonOrganism;
 class UInventoryItemSlot;
 class UWrapBox;
 class UTextBlock;
@@ -33,7 +33,7 @@ public:
 	UTextBlock* CapacityInfo;
 
 	UPROPERTY()
-	AMithrilDungeonCharacter* PlayerCharacter;
+	ADungeonOrganism* PlayerCharacter;
 	UPROPERTY()
 	UInventoryComponent* InventoryReference;
 
@@ -45,4 +45,7 @@ protected:
 	virtual void NativeOnInitialized() override; // 생성자
 	virtual bool NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation) override; // 인벤토리 항목을 드롭할 수 있기 때문에
 
+
+public:
+	void SetTargetCharacter(ADungeonOrganism* target);
 };

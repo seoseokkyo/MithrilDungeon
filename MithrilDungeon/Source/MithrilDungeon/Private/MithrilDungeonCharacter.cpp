@@ -14,7 +14,6 @@
 #include "BaseWeapon.h"
 #include "CombatComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
-#include "inventory/inventoryWidget.h"
 #include "Interfaces/MithrilDungeonHUD.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
 #include "StateComponent.h"
@@ -25,6 +24,11 @@
 #include "inventory/itemBase.h"
 #include "Inventory/InventoryComponent.h"
 #include "World/InterfaceTestActor.h"
+#include "LootPanel.h"
+#include <../../../../../../../Source/Runtime/CoreUObject/Public/UObject/ConstructorHelpers.h>
+#include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
+#include "Interfaces/InteractionInterface.h"
+#include <../../../../../../../Source/Runtime/CoreUObject/Public/UObject/ScriptInterface.h>
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -61,9 +65,7 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 	CameraBoom->TargetArmLength = 400.0f; // The camera follows at this distance behind the character	
 	CameraBoom->bUsePawnControlRotation = true; // Rotate the arm based on the controller
 
-	PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
-	PlayerInventory->SetSlotsCapacity(20); //인벤토리 슬롯 20개생성
-	PlayerInventory->SetWeightCapacity(50.0f); // 무게용량 50설정
+	CreateInventory();
 
 	// Create a follow camera
 	FollowCamera = CreateDefaultSubobject<UCameraComponent>(TEXT("FollowCamera"));
@@ -82,7 +84,10 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 
 	BaseEyeHeight = 74.0f; // 플레이어 눈 높이위로
 
+	lootPanelWidget = CreateWidget<ULootPanel>(GetWorld(), ConstructorHelpers::FClassFinder<ULootPanel>(TEXT("/Script/UMGEditor.WidgetBlueprint'/Game/Enemy/UserInterfaces/WBP_LootPanel.WBP_LootPanel_C'")).Class);
+	//lootPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
 
+	int iTemp = 0;
 }
 
 void AMithrilDungeonCharacter::BeginPlay()
@@ -115,6 +120,8 @@ void AMithrilDungeonCharacter::BeginPlay()
 	HUD = Cast<AMithrilDungeonHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
 	InterfaceActor = Cast<AInterfaceTestActor>(InterfaceActor);
+
+	//PlayerInventory->HandleAddItem();
 }
 
 void AMithrilDungeonCharacter::ServerRPC_ToggleCombat_Implementation()
@@ -192,14 +199,14 @@ void AMithrilDungeonCharacter::PerformInteractionCheck()
 
 		if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
 		{
+			auto charCheck = Cast<ADungeonOrganism>(TraceHit.GetActor());
+			if (charCheck != nullptr)
+			{
+				focusedChar = charCheck;
+			}
+
 			if (TraceHit.GetActor()->GetClass()->ImplementsInterface(UInteractionInterface::StaticClass()))
 			{
-				auto charCheck = Cast<AMithrilDungeonCharacter>(TraceHit.GetActor());
-				if (charCheck != nullptr && charCheck->bDead)
-				{
-					charCheck->LootByOthers(this);
-				}
-
 				if (TraceHit.GetActor() != InteractionData.CurrentInteractable)
 				{
 					FoundInteractable(TraceHit.GetActor());
@@ -210,6 +217,13 @@ void AMithrilDungeonCharacter::PerformInteractionCheck()
 				{
 					return;
 				}
+			}
+		}
+		else
+		{
+			if (focusedChar != nullptr)
+			{
+				focusedChar = nullptr;
 			}
 		}
 	}
@@ -265,23 +279,14 @@ void AMithrilDungeonCharacter::BeginInteract()
 	// 작용 가능한 상태에 아무것도 변경안되었는지 확인
 	PerformInteractionCheck();
 
-	if (InteractionData.CurrentInteractable) // 상호작용 데이터가 현재라면 프로세스로 돌아가게
+	if (focusedChar != nullptr)
 	{
-		if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
-		{
-			// 충돌이 발생하고 다시 상호작용 가능항목 유효한지 확인 후 상호작용 가능
-			TargetInteractable->BeginInteract();
-
-			if (FMath::IsNearlyZero(TargetInteractable->InteractableData.InteractionDuration, 0.1f)) // 허용오차범위 0.1f, 0.2 0.3으로하면 문손잡이 돌릴때느낌으로 약간의 텀을 줄 수 있음.
-			{
-				Interact();
-			}
-			else
-			{
-				GetWorld()->GetTimerManager().SetTimer(TimerHandle_Interaction,
-					this, &AMithrilDungeonCharacter::Interact, TargetInteractable->InteractableData.InteractionDuration/*타겟 상호작용 가능*/, false);
-			}
-		}
+		auto contents = focusedChar->PlayerInventory->GetInventoryContents();
+		focusedChar->LootByOthers(this);
+	}
+	else
+	{
+		ServerRPC_Interact();
 	}
 }
 
@@ -295,7 +300,9 @@ void AMithrilDungeonCharacter::EndInteract()
 	{
 		TargetInteractable->EndInteract();// 이제 대상 상호작용 가능, 대상 상호작용 종료
 	}
-	
+
+	lootPanelWidget->RemoveFromParent();
+
 }
 
 
@@ -305,27 +312,81 @@ void AMithrilDungeonCharacter::Interact()
 
 	if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
 	{
-		TargetInteractable->Interact(this);// 이제 대상 상호작용 가능, 대상 상호작용 종료
+		TargetInteractable->Interact(self);// 이제 대상 상호작용 가능, 대상 상호작용 종료
 	}
 
 }
+
+void AMithrilDungeonCharacter::ServerRPC_Interact_Implementation()
+{
+	if (InteractionData.CurrentInteractable) // 상호작용 데이터가 현재라면 프로세스로 돌아가게
+	{
+		if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
+		{			
+			NetMulticastRPC_Interact(TargetInteractable);
+		}
+	}
+}
+
+void AMithrilDungeonCharacter::NetMulticastRPC_Interact_Implementation(const TScriptInterface<IInteractionInterface>& Interactable)
+{
+	// 충돌이 발생하고 다시 상호작용 가능항목 유효한지 확인 후 상호작용 가능
+	Interactable->BeginInteract();
+
+	self->Interact();
+}
+
+//void AMithrilDungeonCharacter::NetMulticastRPC_Interact(TScriptInterface<IInteractionInterface> Interactable)
+//{
+//	// 충돌이 발생하고 다시 상호작용 가능항목 유효한지 확인 후 상호작용 가능
+//	Interactable->BeginInteract();
+//
+//	self->Interact();
+//
+//	//if (FMath::IsNearlyZero(Interactable->InteractableData.InteractionDuration, 0.1f)) // 허용오차범위 0.1f, 0.2 0.3으로하면 문손잡이 돌릴때느낌으로 약간의 텀을 줄 수 있음.
+//	//{
+//	//	Interact();
+//	//}
+//	//else
+//	//{
+//	//	//GetWorld()->GetTimerManager().SetTimer(TimerHandle_Interaction, this, &AMithrilDungeonCharacter::Interact, Interactable->InteractableData.InteractionDuration/*타겟 상호작용 가능*/, false);
+//
+//	//	GetWorldTimerManager().SetTimer(TimerHandle_Interaction, [&]() {
+//	//		Interact();
+//	//	}, Interactable->InteractableData.InteractionDuration, false);
+//	//}
+//}
 
 void AMithrilDungeonCharacter::DieFunction()
 {
 	auto param = GetMesh()->GetCollisionResponseToChannels();
 	param.SetResponse(ECC_Visibility, ECollisionResponse::ECR_Block);
-	
+
 	GetMesh()->SetCollisionResponseToChannels(param);
+
+	motionState = ECharacterMotionState::Die;
+
+	Super::DieFunction();
 }
 
-void AMithrilDungeonCharacter::LootByOthers(AMithrilDungeonCharacter* otherCharacter)
+void AMithrilDungeonCharacter::CreateInventory()
 {
-	if (motionState != ECharacterMotionState::Die)
-		return;
+	// Do Not Super Call
+	if (PlayerInventory == nullptr)
+	{
+		PlayerInventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	}
 
-	auto contents = PlayerInventory->GetInventoryContents();
+	PlayerInventory->SetSlotsCapacity(60); //인벤토리 슬롯 20개생성
+	PlayerInventory->SetWeightCapacity(50.0f); // 무게용량 50설정
+}
 
+void AMithrilDungeonCharacter::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimeProps) const
+{
+	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
+	DOREPLIFETIME(AMithrilDungeonCharacter, InteractionData);
+	DOREPLIFETIME(AMithrilDungeonCharacter, TargetInteractable);
 }
 
 void AMithrilDungeonCharacter::UpdateInteractionWidget() const
@@ -493,12 +554,10 @@ void AMithrilDungeonCharacter::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-
 	if (GetWorld()->TimeSince(InteractionData.LastInteractionCheckTime) > InteractionCheckFrequecy)
 	{
 		PerformInteractionCheck();
 	}
-
 
 	PrintInfo();
 }

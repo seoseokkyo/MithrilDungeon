@@ -16,6 +16,7 @@ APickup::APickup()
 	PickupMesh->SetSimulatePhysics(true);
 	SetRootComponent(PickupMesh);
 
+	ItemDataTable = ConstructorHelpers::FObjectFinder<UDataTable>(TEXT("/Script/Engine.DataTable'/Game/Enemy/ItemData/TestItems.TestItems'")).Object;
 }
 
 
@@ -24,7 +25,7 @@ void APickup::BeginPlay()
 	Super::BeginPlay();
 
 	InitializePickup(UItemBase::StaticClass(), ItemQuantity); // 수량설정
-	
+
 
 }
 
@@ -97,7 +98,6 @@ void APickup::EndFocus()
 	}
 }
 
-
 void APickup::Interact(AMithrilDungeonCharacter* PlayerCharacter)
 {
 	if (PlayerCharacter)
@@ -106,9 +106,7 @@ void APickup::Interact(AMithrilDungeonCharacter* PlayerCharacter)
 	}
 }
 
-
-
-void APickup::TakePickup(const AMithrilDungeonCharacter* Taker)
+void APickup::TakePickup(const ADungeonOrganism* Taker)
 {
 	if (!IsPendingKillPending()) // 항목추가처리
 	{
@@ -125,16 +123,24 @@ void APickup::TakePickup(const AMithrilDungeonCharacter* Taker)
 				case EItemAddResult::IAR_NoItemAdded:
 					break; // 아무것도하지않음
 				case EItemAddResult::IAR_PartialAmountItemAdded:
+				{
 					UpdateInteractableData(); // 픽업수량업데이트
-					Taker->UpdateInteractionWidget(); // 위젯업데이트
+
+					auto charCheck = Cast<AMithrilDungeonCharacter>(Taker);
+					if (charCheck != nullptr)
+					{
+						// 위젯업데이트
+						charCheck->UpdateInteractionWidget();
+					}
 					break;
+				}
 				case EItemAddResult::IAR_AllItemAdded:
 					Destroy();
 					break;
 				default:
 					break;
 				}
-				UE_LOG(LogTemp,Warning, TEXT("%s"), *AddResult.ResultMessage.ToString());
+				UE_LOG(LogTemp, Warning, TEXT("%s"), *AddResult.ResultMessage.ToString());
 			}
 			else
 			{
@@ -145,7 +151,7 @@ void APickup::TakePickup(const AMithrilDungeonCharacter* Taker)
 		{
 			UE_LOG(LogTemp, Warning, TEXT("Pickup internal item reference was somenow null!!")); // 픽업이 널
 		}
-	}	
+	}
 
 }
 
@@ -167,5 +173,10 @@ void APickup::PostEditChangeProperty(FPropertyChangedEvent& PropertyChangedEvent
 		}
 	}
 
+}
+
+void APickup::SetInput(const ADungeonOrganism* Taker)
+{
+	TakePickup(Taker);
 }
 

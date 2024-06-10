@@ -12,7 +12,7 @@ void UInventoryPanel::NativeOnInitialized()
 {
 	Super::NativeOnInitialized();
 
-	PlayerCharacter = Cast<AMithrilDungeonCharacter>(GetOwningPlayerPawn());
+	PlayerCharacter = Cast<ADungeonOrganism>(GetOwningPlayerPawn());
 	if (PlayerCharacter)
 	{
 		InventoryReference = PlayerCharacter->GetInventory(); // 인벤토리를 가져오고 인벤토리 가져오기를 기억
@@ -67,11 +67,18 @@ void UInventoryPanel::RefreshInventory()
 
 }
 
-
-
-
-
 bool UInventoryPanel::NativeOnDrop(const FGeometry& InGeometry, const FDragDropEvent& InDragDropEvent, UDragDropOperation* InOperation)
 {
 	return false;
+}
+
+void UInventoryPanel::SetTargetCharacter(ADungeonOrganism* target)
+{
+	PlayerCharacter = target;
+
+	InventoryReference = PlayerCharacter->GetInventory(); // 인벤토리를 가져오고 인벤토리 가져오기를 기억
+	if (InventoryReference)
+	{
+		RefreshInventory();
+	}
 }
