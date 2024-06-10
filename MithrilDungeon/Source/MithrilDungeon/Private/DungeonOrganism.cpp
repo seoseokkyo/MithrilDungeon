@@ -112,8 +112,6 @@ void ADungeonOrganism::AttackEvent()
 	{
 		PerformAttack(combatComponent->attackCount, false);
 	}
-
-
 }
 
 void ADungeonOrganism::PerformAttack(int32 attackIndex, bool bUseRandom)
@@ -277,12 +275,12 @@ void ADungeonOrganism::LootByOthers(ADungeonOrganism* otherCharacter)
 
 	//otherCharacter->GetController();
 
-	auto panel = Cast<UInventoryPanel>(lootPanelWidget->GetWidgetFromName(FName(TEXT("WBP_InventoryPanel"))));
+	auto panel = Cast<UInventoryPanel>(otherCharacter->lootPanelWidget->GetWidgetFromName(FName(TEXT("WBP_InventoryPanel"))));
 
 	if (panel)
 	{
 		panel->SetTargetCharacter(this);
-		lootPanelWidget->AddToViewport();
+		otherCharacter->lootPanelWidget->AddToViewport();
 	}
 }
 

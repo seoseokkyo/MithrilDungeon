@@ -17,16 +17,11 @@ AblueZoneActor::AblueZoneActor()
 	meshComp->SetupAttachment(RootComponent);
 
 	meshComp->SetGenerateOverlapEvents(true);
-	//meshComp->SetWorldScale3D(FVector(120));
-
 }
 
 void AblueZoneActor::BeginPlay()
 {
 	Super::BeginPlay();
-
-	//meshComp->OnComponentBeginOverlap.AddDynamic(this, &AblueZoneActor::BeginOverlap);
-	//meshComp->SetWorldScale3D(FVector(120));
 
 	// 현재 남아있는 플레이어 검색
 	for (TActorIterator<AMithrilDungeonCharacter> findActor(GetWorld()); findActor; ++findActor)
@@ -65,31 +60,34 @@ void AblueZoneActor::Tick(float DeltaTime)
 
 		for (const auto& remain : remainPlayers)
 		{
-			FVector playerLoc = remain->GetActorLocation();
-			FVector bluezoneLoc = GetActorLocation();
-
-			float dist = FVector::Dist(playerLoc, bluezoneLoc);
-
-			bool bCheck = false;
-
-			if (playerLoc.X <= bluezoneLoc.X - Rad && playerLoc.X >= bluezoneLoc.X + Rad)
+			if (IsValid(remain))
 			{
-				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InSize X")));
-				bCheck = true;
-			}
+				FVector playerLoc = remain->GetActorLocation();
+				FVector bluezoneLoc = GetActorLocation();
 
-			if (playerLoc.Y <= bluezoneLoc.Y - Rad && playerLoc.Y >= bluezoneLoc.Y + Rad)
-			{
-				UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InSize Y")));
-				bCheck = true;
-			}
+				float dist = FVector::Dist(playerLoc, bluezoneLoc);
 
-			if(Rad < dist && bCheck == false)
-			{
-				auto pc = Cast<AMithrilDungeonCharacter>(remain);
-				if (pc != nullptr)
+				bool bCheck = false;
+
+				if (playerLoc.X <= bluezoneLoc.X - Rad && playerLoc.X >= bluezoneLoc.X + Rad)
 				{
-					pc->ServerRPC_AmountDamage(3 * DeltaTime);
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InSize X")));
+					bCheck = true;
+				}
+
+				if (playerLoc.Y <= bluezoneLoc.Y - Rad && playerLoc.Y >= bluezoneLoc.Y + Rad)
+				{
+					UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("InSize Y")));
+					bCheck = true;
+				}
+
+				if (Rad < dist && bCheck == false)
+				{
+					auto pc = Cast<AMithrilDungeonCharacter>(remain);
+					if (pc != nullptr)
+					{
+						pc->ServerRPC_AmountDamage(3 * DeltaTime);
+					}
 				}
 			}
 		}
@@ -135,18 +133,3 @@ void AblueZoneActor::Tick(float DeltaTime)
 
 	}
 }
-
-void AblueZoneActor::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor, UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
-{
-	// 오버랩 된 사람이 플레이어라면
-	Player = Cast<AMithrilDungeonCharacter>(OtherActor);
-	UE_LOG(LogTemp, Warning, TEXT("player1"))
-		if (OtherActor->IsA<AMithrilDungeonCharacter>())
-		{
-			bPlayer = true;
-			UE_LOG(LogTemp, Warning, TEXT("player"));
-			//데미지를 주는데 시간이 갈수록 주는 데미지가 강해져야함.
-		}
-
-}
-

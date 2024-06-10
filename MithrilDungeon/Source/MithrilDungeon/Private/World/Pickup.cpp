@@ -24,7 +24,7 @@ void APickup::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//InitializePickup(UItemBase::StaticClass(), ItemQuantity); // 수량설정
+	InitializePickup(UItemBase::StaticClass(), ItemQuantity); // 수량설정
 }
 
 

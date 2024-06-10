@@ -202,7 +202,7 @@ void AMithrilDungeonCharacter::PerformInteractionCheck()
 		QueryParams.AddIgnoredActor(this);
 		FHitResult TraceHit; // 라인트레이스 결과 저장하는데 사용
 
-		if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_Visibility, QueryParams))
+		if (GetWorld()->LineTraceSingleByChannel(TraceHit, TraceStart, TraceEnd, ECC_PhysicsBody, QueryParams))
 		{
 			auto charCheck = Cast<ADungeonOrganism>(TraceHit.GetActor());
 			if (charCheck != nullptr)
@@ -306,8 +306,8 @@ void AMithrilDungeonCharacter::EndInteract()
 		TargetInteractable->EndInteract();// 이제 대상 상호작용 가능, 대상 상호작용 종료
 	}
 
+	//lootPanelWidget->SetVisibility(ESlateVisibility::Collapsed);
 	lootPanelWidget->RemoveFromParent();
-
 }
 
 
@@ -317,7 +317,7 @@ void AMithrilDungeonCharacter::Interact()
 
 	if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
 	{
-		TargetInteractable->Interact(self);// 이제 대상 상호작용 가능, 대상 상호작용 종료
+		TargetInteractable->Interact(this);// 이제 대상 상호작용 가능, 대상 상호작용 종료
 	}
 
 }
@@ -338,29 +338,8 @@ void AMithrilDungeonCharacter::NetMulticastRPC_Interact_Implementation(const TSc
 	// 충돌이 발생하고 다시 상호작용 가능항목 유효한지 확인 후 상호작용 가능
 	Interactable->BeginInteract();
 
-	self->Interact();
+	this->Interact();
 }
-
-//void AMithrilDungeonCharacter::NetMulticastRPC_Interact(TScriptInterface<IInteractionInterface> Interactable)
-//{
-//	// 충돌이 발생하고 다시 상호작용 가능항목 유효한지 확인 후 상호작용 가능
-//	Interactable->BeginInteract();
-//
-//	self->Interact();
-//
-//	//if (FMath::IsNearlyZero(Interactable->InteractableData.InteractionDuration, 0.1f)) // 허용오차범위 0.1f, 0.2 0.3으로하면 문손잡이 돌릴때느낌으로 약간의 텀을 줄 수 있음.
-//	//{
-//	//	Interact();
-//	//}
-//	//else
-//	//{
-//	//	//GetWorld()->GetTimerManager().SetTimer(TimerHandle_Interaction, this, &AMithrilDungeonCharacter::Interact, Interactable->InteractableData.InteractionDuration/*타겟 상호작용 가능*/, false);
-//
-//	//	GetWorldTimerManager().SetTimer(TimerHandle_Interaction, [&]() {
-//	//		Interact();
-//	//	}, Interactable->InteractableData.InteractionDuration, false);
-//	//}
-//}
 
 void AMithrilDungeonCharacter::DieFunction()
 {
@@ -406,7 +385,6 @@ void AMithrilDungeonCharacter::UpdateInteractionWidget() const
 void AMithrilDungeonCharacter::ToggleMenu()
 {
 	HUD->ToggleMenu();
-
 }
 
 void AMithrilDungeonCharacter::DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop)

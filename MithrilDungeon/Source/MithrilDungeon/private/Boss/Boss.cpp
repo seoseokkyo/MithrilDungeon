@@ -90,6 +90,8 @@ void ABoss::BeginPlay()
 	}
 
 	CreateInventory();
+
+	InitRandomItem();
 }
 
 void ABoss::Tick(float DeltaTime)

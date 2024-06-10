@@ -72,6 +72,8 @@ void AEnemy::BeginPlay()
 	}
 
 	CreateInventory();
+
+	InitRandomItem();
 }
 
 void AEnemy::Tick(float DeltaTime)
