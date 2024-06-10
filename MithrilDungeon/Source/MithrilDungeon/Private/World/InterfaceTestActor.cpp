@@ -3,6 +3,10 @@
 
 #include "World/InterfaceTestActor.h"
 #include "Components/StaticMeshComponent.h"
+#include "portal/portalActor.h"
+#include "Interfaces/InteractionWidget.h"
+#include "portal/portalBarWidget.h"
+#include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
 
 // Sets default values
 AInterfaceTestActor::AInterfaceTestActor()
@@ -13,6 +17,12 @@ AInterfaceTestActor::AInterfaceTestActor()
 	Mesh = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("Mesh"));
 	SetRootComponent(Mesh);
 
+	portalBarWidgetComp = CreateDefaultSubobject <UWidgetComponent>(TEXT("portalComp"));
+	portalBarWidgetComp->SetupAttachment(RootComponent);
+	
+
+	
+	
 }
 
 // Called when the game starts or when spawned
@@ -21,12 +31,43 @@ void AInterfaceTestActor::BeginPlay()
 	Super::BeginPlay();
 	
 	InteractableData = InstanceInteractableData; // 인스턴스 데이터와 같게설정
+
+	InteractionWidget = Cast<UInteractionWidget>(InteractionWidget);
+
+	portalBarWidget = Cast<UportalBarWidget>(portalBarWidgetComp->GetWidget());
+	
+	portalBarWidget->SetVisibility(ESlateVisibility::Collapsed);
+
 }
 
 // Called every frame
 void AInterfaceTestActor::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bportalOnOff == true)
+	{
+		bportalTime += DeltaTime;
+		//UE_LOG(LogTemp, Warning, TEXT("Calling BeginInteract override on Interface test actor")); // 시작 상호작용 재정의 호출
+		if (bportalTime >= 8.0f)
+		{
+			FActorSpawnParameters params;
+			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
+			GetWorld()->SpawnActor<AportalActor>(portalActorclass, GetActorLocation(), GetActorRotation(), params);
+			bportalTime = 0;
+			bportalOnOff = false;
+			Destroy();
+		}
+		if (portalBarWidget != nullptr)
+		{
+			portalBarWidget->portalBarUpdate(bportalTime);
+		}
+	}
+	else 
+	{	
+		bportalTime = 0;
+	}
+
 
 }
 
@@ -35,6 +76,7 @@ void AInterfaceTestActor::BeginFocus()
 	if (Mesh)
 	{
 		Mesh->SetRenderCustomDepth(true); // 정의깊이 랜더링 부울 입력값 설정
+
 	}
 }
 
@@ -50,15 +92,21 @@ void AInterfaceTestActor::BeginInteract()
 {
 	UE_LOG(LogTemp, Warning, TEXT("Calling BeginInteract override on Interface test actor")); // 시작 상호작용 재정의 호출
 
+
+	bportalOnOff = true;
+	portalBarWidget->SetVisibility(ESlateVisibility::Visible);
 }
 
 void AInterfaceTestActor::EndInteract()
 {
+	bportalOnOff = false;
 	UE_LOG(LogTemp, Warning, TEXT("Calling EndInteract override on Interface test actor"));
+	portalBarWidget->SetVisibility(ESlateVisibility::Collapsed);
 }
 
 void AInterfaceTestActor::Interact(AMithrilDungeonCharacter* PlayerCharacter)
 {
 	UE_LOG(LogTemp, Warning, TEXT("Calling Interact override on Interface test actor"));
+	
 }
 

@@ -113,6 +113,8 @@ public:
 
 	void DropItem(UItemBase* ItemToDrop, const int32 QuantityToDrop);
 
+	class AInterfaceTestActor* InterfaceActor;
+
 	// 진원 E
 protected:
 	// 진원 S
