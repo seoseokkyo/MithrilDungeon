@@ -53,7 +53,7 @@ void AInterfaceTestActor::Tick(float DeltaTime)
 		{
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
-			GetWorld()->SpawnActor<AportalActor>(portalActorclass, GetActorLocation(), GetActorRotation(), params);
+			GetWorld()->SpawnActor<AportalActor>(portalActorclass, GetActorLocation()+FVector(0,0,100), GetActorRotation(), params);
 			bportalTime = 0;
 			bportalOnOff = false;
 			Destroy();
