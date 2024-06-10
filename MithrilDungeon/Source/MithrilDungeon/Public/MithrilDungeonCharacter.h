@@ -98,12 +98,6 @@ class AMithrilDungeonCharacter : public ADungeonOrganism
 
 public:
 	AMithrilDungeonCharacter();
-
-	UPROPERTY(EditDefaultsOnly, Category = TPS)
-	class UWidgetComponent* inventoryComp;
-
-	//class UinventoryWidget* inventoryWidget;
-
 	// 진원 S
 	FORCEINLINE bool IsInteracting() const {return GetWorld()->GetTimerManager().IsTimerActive(TimerHandle_Interaction); }; // 현재 상호작용중인지 아닌지
 
@@ -134,7 +128,6 @@ protected:
 
 	void ToggleCombatFunction(const FInputActionValue& Value);
 
-	void InventoryOnOff(const FInputActionValue& Value);
 	bool bInventorystate = false;
 
 	virtual void Tick(float DeltaTime) override;

@@ -77,10 +77,6 @@ AMithrilDungeonCharacter::AMithrilDungeonCharacter()
 
 	characterName = TEXT("Player");
 
-
-	inventoryComp = CreateDefaultSubobject<UWidgetComponent>(TEXT("HPComp"));
-	inventoryComp->SetupAttachment(RootComponent);
-
 	InteractionCheckFrequecy = 0.1; // 빈도확인
 	InteractionCheckDistance = 225.0f;
 
@@ -115,16 +111,6 @@ void AMithrilDungeonCharacter::BeginPlay()
 	{
 		equipment->OnEquipped();
 	}
-
-	//inventoryWidget = Cast<UinventoryWidget>(inventoryComp->GetWidget());
-	//
-	//if (inventoryWidget != nullptr)
-	//{
-	//	inventoryComp->SetWidget(nullptr);
-	//	inventoryWidget->AddToViewport();
-	//	inventoryWidget->inventoryOpen();
-	//	inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-	//}
 
 	HUD = Cast<AMithrilDungeonHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 
@@ -501,30 +487,6 @@ void AMithrilDungeonCharacter::ToggleCombatFunction(const FInputActionValue& Val
 			ServerRPC_ToggleCombat();
 		}
 	}
-}
-
-void AMithrilDungeonCharacter::InventoryOnOff(const FInputActionValue& Value)
-{
-	//// 인벤토리 온으로 변경
-	//if (!bInventorystate)
-	//{
-	//	if (inventoryWidget != nullptr)
-	//	{
-	//		inventoryWidget->SetVisibility(ESlateVisibility::Visible);
-	//		bInventorystate = true;
-	//	}
-	//}
-	//
-	//// 인벤토리 오프로 변경
-	//else
-	//{
-	//	if (inventoryWidget != nullptr)
-	//	{
-	//		inventoryWidget->SetVisibility(ESlateVisibility::Hidden);
-	//		bInventorystate = false;
-	//	}
-	//}
-
 }
 
 void AMithrilDungeonCharacter::Tick(float DeltaTime)

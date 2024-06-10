@@ -50,7 +50,7 @@ void AEnemy::BeginPlay()
 		Player = *findActor;
 	}
 
-	aiCon = GetController<AAIController>();	
+	aiCon = GetAIController();
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
 	enemyState = EEnemyState::IDLE;
@@ -147,8 +147,6 @@ void AEnemy::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 void AEnemy::Idle()
 {
 	SearchPlayer();
-
-
 }
 
 void AEnemy::MoveTotaget()
@@ -198,6 +196,8 @@ void AEnemy::AttackDelay()
 {
 	if (bOnAttackDelay == false)
 	{
+		aiCon = GetAIController();
+
 		if (aiCon != nullptr)
 		{
 			aiCon->StopMovement();
@@ -231,6 +231,8 @@ void AEnemy::DieFunction()
 void AEnemy::ServerRPC_DieFunction_Implementation()
 {
 	enemyState = EEnemyState::DIE;
+
+
 
 	aiCon->SetFocus(nullptr);
 
@@ -269,6 +271,19 @@ void AEnemy::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePr
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
 	DOREPLIFETIME(AEnemy, enemyState);
+}
+
+AAIController* AEnemy::GetAIController()
+{
+	aiCon = GetController<AAIController>();
+
+	if (aiCon == nullptr)
+	{
+		SpawnDefaultController();
+		aiCon = GetController<AAIController>();
+	}
+
+	return aiCon;
 }
 
 void AEnemy::PrintInfo()

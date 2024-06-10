@@ -118,5 +118,5 @@ private:
 	class AActor* target;
 
 	
-
+	AAIController* GetAIController();
 };

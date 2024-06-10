@@ -51,8 +51,7 @@ void ABoss::BeginPlay()
 	//	Player = *findActor;
 	//}
 
-	SpawnDefaultController();
-	aiCon = GetController<AAIController>();
+	aiCon = GetAIController();
 
 	// 기본 상태를 IDLE 상태로 초기화한다.
 	enemyState = EEnemyState::IDLE;
@@ -209,12 +208,10 @@ void ABoss::Attack()
 
 void ABoss::AttackDelay()
 {
+	aiCon = GetAIController();
+
 	if (aiCon)
 	{		
-		SpawnDefaultController();
-
-		aiCon = GetController<AAIController>();
-
 		aiCon->StopMovement();
 	}
 
@@ -240,6 +237,19 @@ void ABoss::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 
 	DOREPLIFETIME(ABoss, combatComponent_Additional);
 	DOREPLIFETIME(ABoss, enemyState);
+}
+
+AAIController* ABoss::GetAIController()
+{
+	aiCon = GetController<AAIController>();
+
+	if (aiCon == nullptr)
+	{
+		SpawnDefaultController();
+		aiCon = GetController<AAIController>();
+	}
+
+	return aiCon;
 }
 
 
@@ -319,6 +329,8 @@ void ABoss::DieFunction()
 void ABoss::ServerRPC_DieFunction_Implementation()
 {
 	enemyState = EEnemyState::DIE;
+
+	aiCon = GetAIController();
 
 	aiCon->SetFocus(nullptr);
 
