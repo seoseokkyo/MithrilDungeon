@@ -17,6 +17,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetMathLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 #include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 
 // Sets default values
@@ -193,7 +194,6 @@ void AEnemy::Attack()
 		UE_LOG(LogTemp, Warning, TEXT("AttackAM!!"))
 			enemyState = EEnemyState::ATTACKDELAY;
 	}
-
 }
 
 void AEnemy::AttackDelay()
@@ -226,8 +226,13 @@ void AEnemy::AttackDelay()
 void AEnemy::DieFunction()
 {
 	GetMesh()->GetAnimInstance()->StopAllMontages(0.2);
-	
+
 	Super::DieFunction();
+
+	if (DeathSound && enemyState != EEnemyState::DIE)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), DeathSound, GetActorLocation());
+	}
 
 	ServerRPC_DieFunction();
 }
@@ -235,8 +240,6 @@ void AEnemy::DieFunction()
 void AEnemy::ServerRPC_DieFunction_Implementation()
 {
 	enemyState = EEnemyState::DIE;
-
-
 
 	aiCon->SetFocus(nullptr);
 

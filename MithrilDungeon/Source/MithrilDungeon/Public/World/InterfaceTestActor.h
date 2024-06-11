@@ -35,6 +35,9 @@ public:
 	UPROPERTY(EditAnywhere, Category = "Portal")
 	UportalBarWidget* portalBarWidget;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	USoundBase* portalSound;
+
 protected:
 	virtual void BeginPlay() override;
 

@@ -134,6 +134,11 @@ public:
 
 	void InitRandomItem();
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	USoundBase* DeathSound;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite)
+	USoundBase* HitSound;
 
 	UPROPERTY(Replicated)
 	int32 itemRandNums = 0;

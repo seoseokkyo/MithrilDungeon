@@ -29,6 +29,7 @@
 #include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
 #include "Interfaces/InteractionInterface.h"
 #include <../../../../../../../Source/Runtime/CoreUObject/Public/UObject/ScriptInterface.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -339,6 +340,13 @@ void AMithrilDungeonCharacter::NetMulticastRPC_Interact_Implementation(const TSc
 	Interactable->BeginInteract();
 
 	this->Interact();
+}
+
+float AMithrilDungeonCharacter::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+
+	return 0.0f;
 }
 
 void AMithrilDungeonCharacter::DieFunction()

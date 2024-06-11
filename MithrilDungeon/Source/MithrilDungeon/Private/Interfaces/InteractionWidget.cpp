@@ -37,7 +37,7 @@ void UInteractionWidget::UpdateWidget(const FInteractableData& InteractableData)
 	else
 	{
 		QuantityText->SetText(FText::Format(FText::FromString("x{0}"), InteractableData.Quantity)); // 인수 0을가져와 여기에 알고있는 다른숫자가 있으면 거기에넣음.
-		QuantityText->SetVisibility(ESlateVisibility(Visibility));
+		QuantityText->SetVisibility(ESlateVisibility::Visible);
 	}
 		break;
 

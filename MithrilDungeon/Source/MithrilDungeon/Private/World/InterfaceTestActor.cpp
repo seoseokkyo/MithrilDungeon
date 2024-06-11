@@ -7,6 +7,7 @@
 #include "Interfaces/InteractionWidget.h"
 #include "portal/portalBarWidget.h"
 #include <../../../../../../../Source/Runtime/UMG/Public/Components/WidgetComponent.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 // Sets default values
 AInterfaceTestActor::AInterfaceTestActor()
@@ -51,6 +52,12 @@ void AInterfaceTestActor::Tick(float DeltaTime)
 		//UE_LOG(LogTemp, Warning, TEXT("Calling BeginInteract override on Interface test actor")); // 시작 상호작용 재정의 호출
 		if (bportalTime >= 8.0f)
 		{
+			if (portalSound)
+			{
+				UGameplayStatics::PlaySoundAtLocation(GetWorld(), portalSound, GetActorLocation());
+			}
+
+
 			FActorSpawnParameters params;
 			params.SpawnCollisionHandlingOverride = ESpawnActorCollisionHandlingMethod::AlwaysSpawn;
 			GetWorld()->SpawnActor<AportalActor>(portalActorclass, GetActorLocation()+FVector(0,0,100), GetActorRotation(), params);

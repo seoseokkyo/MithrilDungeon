@@ -14,6 +14,7 @@
 #include "inventory/InventoryComponent.h"
 #include "Interfaces/InventoryPanel.h"
 #include "World/Pickup.h"
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 // Sets default values
 ADungeonOrganism::ADungeonOrganism()
@@ -37,6 +38,9 @@ void ADungeonOrganism::BeginPlay()
 	Super::BeginPlay();
 
 	UKismetSystemLibrary::PrintString(GetWorld(), FString::Printf(TEXT("characterName : %s"), *characterName));
+
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Block);
+	GetCapsuleComponent()->SetCollisionResponseToChannel(ECollisionChannel::ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	stateComp->InitStat();
 	stateComp->UpdateStat();
@@ -62,8 +66,13 @@ float ADungeonOrganism::TakeDamage(float DamageAmount, FDamageEvent const& Damag
 {
 	float temp = stateComp->AddStatePoint(HP, -DamageAmount);
 
+	if (HitSound)
+	{
+		UGameplayStatics::PlaySoundAtLocation(GetWorld(), HitSound, GetActorLocation());
+	}
+
 	// µð¹ö±×
-	if (1)
+	if (0)
 	{
 		if (EventInstigator != nullptr)
 		{
@@ -297,7 +306,7 @@ void ADungeonOrganism::CreateInventory()
 
 void ADungeonOrganism::InitRandomItem()
 {
-	itemRandNums = FMath::RandRange(0, 10);
+	itemRandNums = FMath::RandRange(5, 10);
 
 	ServerRPC_SetItemRandNums(itemRandNums);
 

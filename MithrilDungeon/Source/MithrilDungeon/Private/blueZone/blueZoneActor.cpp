@@ -7,6 +7,7 @@
 #include "MithrilDungeonCharacter.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/EngineUtils.h>
 #include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/GameplayStatics.h>
 
 // Sets default values
 AblueZoneActor::AblueZoneActor()
@@ -87,6 +88,17 @@ void AblueZoneActor::Tick(float DeltaTime)
 					if (pc != nullptr)
 					{
 						pc->ServerRPC_AmountDamage(3 * DeltaTime);
+
+						if (blueZoneSound)
+						{
+							if (blueZoneTime - lastPlay > 1)
+							{
+								lastPlay = blueZoneTime;
+
+								UGameplayStatics::PlaySoundAtLocation(GetWorld(), blueZoneSound, pc->GetActorLocation());
+							}
+
+						}
 					}
 				}
 			}
