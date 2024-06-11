@@ -17,6 +17,7 @@
 #include "BaseWeapon.h"
 #include "CombatComponent.h"
 #include <../../../../../../../Source/Runtime/Engine/Public/Net/UnrealNetwork.h>
+#include <../../../../../../../Source/Runtime/Engine/Classes/Kismet/KismetSystemLibrary.h>
 
 
 ABoss::ABoss()
@@ -131,7 +132,10 @@ void ABoss::Tick(float DeltaTime)
 
 		break;
 	case EEnemyState::DIE:
-		Die();
+		if (bDead == false)
+		{
+			Die();
+		}
 		break;
 	default:
 		break;
@@ -181,6 +185,11 @@ void ABoss::MoveTotaget()
 		{
 			enemyState = EEnemyState::ATTACK;
 		}
+
+		if (FVector::Distance(GetActorLocation(), targetLoc) >= 500)
+		{
+			enemyState = EEnemyState::IDLE;
+		}
 	}
 }
 
@@ -211,17 +220,29 @@ void ABoss::Attack()
 
 void ABoss::AttackDelay()
 {
-	aiCon = GetAIController();
+	if (bOnAttackDelay == false)
+	{
+		aiCon = GetAIController();
 
-	if (aiCon)
-	{		
-		aiCon->StopMovement();
+		if (aiCon != nullptr)
+		{
+			aiCon->StopMovement();
+		}
+
+		UKismetSystemLibrary::PrintString(GetWorld(), TEXT("AttackDelay Call"));
+
+		FTimerHandle AttackTimer;
+
+		bOnAttackDelay = true;
+
+		GetWorld()->GetTimerManager().SetTimer(AttackTimer, [&]() {
+
+			enemyState = EEnemyState::IDLE;
+
+			UKismetSystemLibrary::PrintString(GetWorld(), TEXT("EEnemyState::IDLE"));
+
+			}, 6, false);
 	}
-
-	FTimerHandle AttackTimer;
-	GetWorld()->GetTimerManager().SetTimer(AttackTimer, [&]() {
-		enemyState = EEnemyState::IDLE;
-		}, 3, false);
 }
 
 void ABoss::Die()

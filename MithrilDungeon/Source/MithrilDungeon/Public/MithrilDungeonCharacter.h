@@ -194,7 +194,6 @@ public:
 	UFUNCTION(NetMulticast, Reliable)
 	void NetMulticastRPC_ToggleCombat();
 
-
 	virtual float TakeDamage(float DamageAmount, struct FDamageEvent const& DamageEvent, class AController* EventInstigator, class AActor* DamageCauser) override;
 
 	virtual void DieFunction() override;

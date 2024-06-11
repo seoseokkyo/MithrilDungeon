@@ -328,7 +328,7 @@ void AMithrilDungeonCharacter::ServerRPC_Interact_Implementation()
 	if (InteractionData.CurrentInteractable) // 상호작용 데이터가 현재라면 프로세스로 돌아가게
 	{
 		if (IsValid(TargetInteractable.GetObject())) // 여전히 유효한경우
-		{			
+		{
 			NetMulticastRPC_Interact(TargetInteractable);
 		}
 	}
@@ -355,6 +355,16 @@ void AMithrilDungeonCharacter::DieFunction()
 	param.SetResponse(ECC_Visibility, ECollisionResponse::ECR_Block);
 
 	GetMesh()->SetCollisionResponseToChannels(param);
+
+	if (IsLocallyControlled())
+	{
+		auto pc = Cast<APlayerController>(Controller);
+
+		if (pc)
+		{
+			DisableInput(pc);
+		}
+	}
 
 	motionState = ECharacterMotionState::Die;
 

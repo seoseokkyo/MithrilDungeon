@@ -169,6 +169,11 @@ void AEnemy::MoveTotaget()
 		{
 			enemyState = EEnemyState::ATTACK;
 		}
+
+		if (FVector::Distance(GetActorLocation(), targetLoc) >= 500)
+		{
+			enemyState = EEnemyState::IDLE;
+		}
 	}
 }
 
@@ -350,9 +355,34 @@ void AEnemy::SearchPlayer()
 {
 	//UE_LOG(LogTemp, Warning, TEXT("sug"));
 
-	FVector Start = GetActorLocation();
-	FVector End = Player->GetActorLocation();
-	if (FVector::Distance(Start, End) > 1000)
+	Player = nullptr;
+
+	float nearestDist = 9999999.9f;
+
+	// 월드에 있는 플레이어를 찾는다.
+	for (TActorIterator<AMithrilDungeonCharacter> findActor(GetWorld()); findActor; ++findActor)
+	{
+		AMithrilDungeonCharacter* temp = nullptr;
+
+		temp = *findActor;
+
+		FVector Start = GetActorLocation();
+		FVector End = temp->GetActorLocation();
+
+		float dist = FVector::Dist(Start, End);
+
+		if (dist < 1000)
+		{
+			if (nearestDist > dist)
+			{
+				nearestDist = dist;
+
+				Player = *findActor;
+			}
+		}
+	}
+
+	if (Player == nullptr)
 	{
 		enemyState = EEnemyState::IDLE;
 	}
