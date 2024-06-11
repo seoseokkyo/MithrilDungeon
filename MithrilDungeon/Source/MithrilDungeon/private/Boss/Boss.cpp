@@ -262,7 +262,7 @@ void ABoss::GetLifetimeReplicatedProps(TArray<FLifetimeProperty>& OutLifetimePro
 {
 	Super::GetLifetimeReplicatedProps(OutLifetimeProps);
 
-	DOREPLIFETIME(ABoss, combatComponent_Additional);
+	//DOREPLIFETIME(ABoss, combatComponent_Additional);
 	DOREPLIFETIME(ABoss, enemyState);
 }
 
