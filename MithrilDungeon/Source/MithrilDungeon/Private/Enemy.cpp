@@ -64,7 +64,7 @@ void AEnemy::BeginPlay()
 		spawnParam.Owner = this;
 		spawnParam.Instigator = this;
 
-		ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, GetActorTransform(), spawnParam);
+		ABaseWeapon* equipment = GetWorld()->SpawnActor<ABaseWeapon>(defaultWeapon, FTransform(GetActorRotation(), GetActorLocation(), FVector(1, 1, 1)), spawnParam);
 
 		if (equipment)
 		{
