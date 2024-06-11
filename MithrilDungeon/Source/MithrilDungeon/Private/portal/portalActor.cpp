@@ -48,8 +48,8 @@ void AportalActor::BeginOverlap(UPrimitiveComponent* OverlappedComponent, AActor
 	if (OtherActor->IsA<AMithrilDungeonCharacter>())
 	{
 		// 로비로 나가기
-		//UGameplayStatics::OpenLevel(this, "lobbyLevel");
-		// Destroy();
+		UGameplayStatics::OpenLevel(this, "ThirdPersonMap");
+		//Destroy();
 		UE_LOG(LogTemp, Warning, TEXT("Level"));
 	}
 }
