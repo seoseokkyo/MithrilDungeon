@@ -99,7 +99,10 @@ void ABoss::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	PrintInfo();
+	if (0)
+	{
+		PrintInfo();
+	}
 
 	if (bDead)
 	{
