@@ -66,6 +66,8 @@
 	  <img src="./images/common/BlueZoneTick_2.jpg" alt="BlueZoneTick_2" style="width: 100%;">
 	  <img src="./images/common/BlueZoneTick_3.jpg" alt="BlueZoneTick_3" style="width: 100%;">
     </td>
+  </tr>
+  <tr>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
         <li>게임시작 후 3분뒤에 스폰되는 블루존 기능 구현</li>
@@ -120,7 +122,7 @@
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
-        <li선호하는 깃 관리방식인 Release/Work(최신)/Worker1/Worker2....방식으로 깃 관리를 진행</li>
+        <li>선호하는 깃 관리방식인 Release/Work(최신)/Worker1/Worker2....방식으로 깃 관리를 진행</li>
       </ul>
     </td>
   </tr>
