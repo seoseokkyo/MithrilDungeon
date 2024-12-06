@@ -1,4 +1,4 @@
-# 프로젝트 이름
+# MithrilDungeon
 
 <p align="center">
   <br>
@@ -120,7 +120,7 @@
     </td>
     <td style="width: 70%; vertical-align: top; text-align: left;">
       <ul>
-        <li><li>선호하는 깃 관리방식인 Release/Work(최신)/Worker1/Worker2....방식으로 깃 관리를 진행</li></li>
+        <li선호하는 깃 관리방식인 Release/Work(최신)/Worker1/Worker2....방식으로 깃 관리를 진행</li>
       </ul>
     </td>
   </tr>
